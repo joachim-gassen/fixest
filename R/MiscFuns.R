@@ -10558,6 +10558,15 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster, ssc = N
 	se_all = sum_object$coeftable[, 2]
 	coef_all = sum_object$coeftable[, 1]
 
+	# The above drops all dimensions including the row names when there
+	# is only one coefficient and the code relies on working on a named
+	# vector, so...
+
+	if(is.null(names(coef_all))) {
+	    names(coef_all) <- row.names(sum_object$coeftable)
+	    names(se_all)  <- row.names(sum_object$coeftable)
+	}
+
 	# the parameters for which we should compute the confint
 	all_params = names(coef_all)
 
