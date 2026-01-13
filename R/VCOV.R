@@ -875,28 +875,44 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   #### ... vcov attributes ####
   ####
 
-  # After discussing, we decided that since this test is relatively cheap, we will do it every time. 
-  # We will warn even if `vcov_fix == FALSE`.
+  # After discussing, we decided that since this test is relatively cheap, we will do it every time.
   eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)$values
   if(any(eigenvalues <= 0)){
-    # We 'fix' it
+    # We 'fix' it by regularizing the VCOV
+    # NOTA: we ALWAYS fix even if vcov_fix = FALSE
+    #       => we only report a warning if the changes are "noticeable" 
+    
+    all_attr = attributes(vcov_mat)
+    fixed_vcov = mat_posdef_fix(vcov_mat)
+    
+    noticeable_change = max(abs(vcov_mat - fixed_vcov)) > 1e-8
+    
     if(vcov_fix){
-      all_attr = attributes(vcov_mat)
-      vcov_mat = mat_posdef_fix(vcov_mat)
-      is_complex = isTRUE(attr(vcov_mat, "is_complex"))
-      attributes(vcov_mat) = all_attr
-
-      if(is_complex){
-        # we should never have a complex VCOV, but just in case...
-        warning("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.", call. = FALSE)
-        vcov_mat = as.complex(vcov_mat)
-      } else if(!isFALSE(dots$warn)){
-        warning("The VCOV matrix is not positive semi-definite and was 'fixed' (see ?vcov).", 
-                call. = FALSE)
-      } 
-    } else if(!isFALSE(dots$warn)){
-      warning("The VCOV matrix is not positive semi-definite.", call. = FALSE)
+      # we always turn it into positive definite even if the change is not noticeable
+      # because other software down the road may expect PD
+      is_complex = isTRUE(attr(fixed_vcov, "is_complex"))
+      attributes(fixed_vcov) = all_attr
+      vcov_mat = fixed_vcov
     }
+    
+    if(noticeable_change){
+      if(vcov_fix){
+        if(is_complex){
+          # we should never have a complex VCOV, but just in case...
+          warning("The VCOV matrix could not be fixed since its eigenvalues were complex. The complex standard-errors are reported for information purposes.", call. = FALSE)
+          vcov_mat = as.complex(vcov_mat)
+          
+        } else if(!isFALSE(dots$warn)){
+          warning("The VCOV matrix is not positive definite and was 'fixed' (see ?vcov).", 
+                  call. = FALSE)
+          
+        } 
+      } else if(!isFALSE(dots$warn)){
+        warning("The VCOV matrix is not positive definite (see ?vcov).", call. = FALSE)
+      }
+    }
+    
+    
   }
 
   if(is_attr){

@@ -1,26 +1,27 @@
 
 # fixest 0.13.3
 
-## bug fixes
-
-- vcov: fig bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postivie definite. Reported by @MatthieuStigler.
-
-## Changes
-
-- VCOV: the test for non positive definite matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
-## New features
-
-- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, inseadof column spans. It also errors more gracefully. This change is retro compatible. 
-
-- in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
-
 ## Bug fixes
+
+- vcov: fig bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postive definite. Reported by @MatthieuStigler.
 
 - `etable`: fix bug when extralines or headers was single valued (fixes #399)
 
 - fix bug leading to R crach when the dependent variable contained only missing values (reported by @Orgron, #603)
 
 - `update.fixest()` and `update.fixest_multi()` no longer throw a warning if `use_calling_env` is used (#619, @etiennebacher).
+
+## New features
+
+- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, inseadof column spans. It also errors more gracefully. This change is retro compatible. 
+
+- in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
+
+## Changes
+
+- VCOV: the test for non positive definite (PD) matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
+
+- VCOV: when the VCOV is not PD, the user is informed only if the regularized PD matrix is noticeably different (at least one difference larger than `1e-8`).
 
 # fixest 0.13.2
 
