@@ -8,16 +8,29 @@
 ## Changes
 
 - VCOV: the test for non positive definite matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
+## New features
+
+- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, inseadof column spans. It also errors more gracefully. This change is retro compatible. 
+
+- in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
+
+## Bug fixes
+
+- `etable`: fix bug when extralines or headers was single valued (fixes #399)
+
+- fix bug leading to R crach when the dependent variable contained only missing values (reported by @Orgron, #603)
+
+- `update.fixest()` and `update.fixest_multi()` no longer throw a warning if `use_calling_env` is used (#619, @etiennebacher).
 
 # fixest 0.13.2
 
-## bug fixes
+## Bug fixes
 
 - fix ad hoc bug with the reverse dependency `did2s` < `1.0.2`
 
 # fixest 0.13.1
 
-## bug fixes
+## Bug fixes
 
 - fix bug in the package startup message
 
