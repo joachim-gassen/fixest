@@ -1,4 +1,14 @@
 
+# fixest 0.13.3
+
+## bug fixes
+
+- vcov: fig bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postivie definite. Reported by @MatthieuStigler.
+
+## Changes
+
+- VCOV: the test for non positive definite matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
+
 # fixest 0.13.2
 
 ## bug fixes
