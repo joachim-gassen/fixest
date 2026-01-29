@@ -1,0 +1,11 @@
+[project]
+name = "benchmark-sim"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12.2"
+dependencies = [
+    "ipython>=9.9.0",
+    "pandas>=2.3.3",
+    "pyfixest>=0.40.1",
+]
