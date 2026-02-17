@@ -653,7 +653,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
   check_set_arg(type, "character vector no na | os formula")
   check_arg(simplify, verbose, "logical scalar")
 
-  if("formula" %in% class(type)){
+  if(inherits(type, "formula")){
     type = .xpd(type, frame = frame)
 
     type = gsub(" ", "", strsplit(deparse_long(type[[2]]), "+", fixed = TRUE)[[1]])
@@ -1222,7 +1222,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
 fitstat_validate = function(x, vector = FALSE){
   check_value(x, "NA | os formula | charin(FALSE) | character vector no na", .arg_name = "fitstat", .up = 1)
 
-  if("formula" %in% class(x)){
+  if(inherits(x, "formula")){
     x = attr(terms(update(~ DEFAULT, x)), "term.labels")
   } else if (length(x) == 1 && (isFALSE(x) || is.na(x))){
     x = c()
@@ -1325,7 +1325,7 @@ r2 = function(x, type = "all", full_names = FALSE){
 
   check_arg(full_names, "logical scalar")
 
-  if(!"fixest" %in% class(x)){
+  if(!inherits(x, "fixest")){
     stop("Only 'fixest' objects are supported.")
   }
 

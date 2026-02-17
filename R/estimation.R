@@ -572,7 +572,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
     }
 
-    if("try-error" %in% class(env)){
+    if(inherits(env, "try-error")){
       stop(format_error_msg(env, "feols"))
     }
 
@@ -2275,7 +2275,7 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
     stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
   }
 
-  if("try-error" %in% class(env)){
+  if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feols.fit", mc[["origin"]])
     stop(format_error_msg(env, origin))
@@ -2518,7 +2518,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
     stop("Argument 'env' must be an environment created by a fixest estimation. Currently it is not ", ifelse(r, "an", "a 'fixest'"), " environment.")
   }
 
-  if("try-error" %in% class(env)){
+  if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feglm", mc[["origin"]])
     stop(format_error_msg(env, origin))
@@ -2625,7 +2625,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                          warn = warn, verbose = verbose, origin = "feglm.fit",
                          mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
-    if("try-error" %in% class(env)){
+    if(inherits(env, "try-error")){
       stop(format_error_msg(env, "feglm.fit"))
     }
 
@@ -2825,7 +2825,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                                glm.tol = 1e-2, fixef.tol = 1e-2, env = env, 
                                lean_internal = TRUE))
 
-      if("try-error" %in% class(model_fe)){
+      if(inherits(model_fe, "try-error")){
         stop("Estimation failed during initialization when getting the fixed-effects, maybe change the values of 'start'? \n", model_fe)
       }
 
@@ -3556,7 +3556,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
                    only.coef = only.coef, data.save = data.save,
                    env = env, ...), silent = TRUE)
 
-  if("try-error" %in% class(res)){
+  if(inherits(res, "try-error")){
     stop(format_error_msg(res, "femlm"))
   }
 
@@ -3597,7 +3597,7 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
                    origin_bis = "fenegbin", mc_origin_bis = match.call(),
                    call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
-  if("try-error" %in% class(res)){
+  if(inherits(res, "try-error")){
     stop(format_error_msg(res, "fenegbin"))
   }
 
@@ -3642,7 +3642,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   origin_bis = "fepois", mc_origin_bis = match.call(),
                   call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
-  if("try-error" %in% class(res)){
+  if(inherits(res, "try-error")){
     stop(format_error_msg(res, "fepois"))
   }
 
@@ -4079,7 +4079,7 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
     return(env)
   }
 
-  if("try-error" %in% class(env)){
+  if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feNmlm", mc[["origin"]])
     stop(format_error_msg(env, origin))
@@ -4243,7 +4243,7 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
                           upper = upper, gradient = gradient, hessian = hessian, 
                           control = opt.control), silent = TRUE)
 
-  if("try-error" %in% class(opt)){
+  if(inherits(opt, "try-error")){
     # We return the coefficients (can be interesting for debugging)
     iter = get("iter", env)
     origin = get("origin", env)

@@ -62,7 +62,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
   if (!missing(data) && missing(type)) {
     sc = sys.call()
     if (!"data" %in% names(sc)) {
-      if (!is.null(data) && (is.character(data) || "formula" %in% class(data))) {
+      if (!is.null(data) && (is.character(data) || inherits(data, "formula"))) {
         # data is in fact the type
         type = data
         data = NULL
@@ -104,7 +104,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     data = as.data.frame(data)
   }
 
-  if (!"data.frame" %in% class(data)) {
+  if (!inherits(data, "data.frame")) {
     stop("The argument 'data' must be a data.frame or a matrix.")
   }
 

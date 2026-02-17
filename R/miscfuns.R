@@ -635,7 +635,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
   IS_INDIV = FALSE
   if(!missing(indiv)){
     IS_INDIV = TRUE
-    if("formula" %in% class(indiv)){
+    if(inherits(indiv, "formula")){
 
       check_arg(indiv, "os formula")
       indiv_varname = attr(terms(indiv), "term.labels")
@@ -654,7 +654,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       }
 
       indiv_var = try(eval(str2lang(indiv_varname), base), silent = TRUE)
-      if("try-error" %in% class(indiv_var)){
+      if(inherits(indiv_var, "try-error")){
         stop("Evaluation of `indiv` raises and error:\n", indiv_var)
       }
     } else if(length(indiv) == 1 && is.character(indiv)){
@@ -682,7 +682,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
   #
 
   usePost = FALSE
-  if("formula" %in% class(fml_in)){
+  if(inherits(fml_in, "formula")){
     if(missing(base) || !is.data.frame(base)){
       stop("If you provide a formula, a data.frame must be given in argument `base`.")
     }
@@ -710,7 +710,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
     }
 
     treat_var = try(eval(fml[[3]], base), silent = TRUE)
-    if("try-error" %in% class(treat_var)){
+    if(inherits(treat_var, "try-error")){
       stop("Evaluation of the `treatment` variable raises and error: \n", treat_var)
     }
 
@@ -721,7 +721,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       }
 
       post_var = try(eval(pipe[[2]], base), silent = TRUE)
-      if("try-error" %in% class(post_var)){
+      if(inherits(post_var, "try-error")){
         stop("Evaluation of the `post` variable raises and error: \n", treat_var)
       }
 
@@ -738,7 +738,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       if(usePost) all_vars = setdiff(all_vars, as.character(pipe))
       if(IS_INDIV) all_vars = setdiff(all_vars, indiv_varname)
 
-      if("data.table" %in% class(base)){
+      if(inherits(base, "data.table")){
         mat_vars = as.data.frame(base[, all_vars, with = FALSE])
       } else {
         mat_vars = base[, all_vars, FALSE]
@@ -774,7 +774,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       for(i in seq_along(var2eval)){
         var = var2eval[i]
         x_small = try(eval(parse(text=var), base_small), silent = TRUE)
-        if("try-error" %in% class(x_small)){
+        if(inherits(x_small, "try-error")){
           stop("Evaluation of the variable `", var, "` raises and error:\n", x_small)
         }
 
@@ -810,7 +810,7 @@ did_means = function(fml, base, treat_var, post_var, tex = FALSE, treat_dict,
       }
 
       # We exclude non numeric variables
-      if("data.frame" %in% class(mat_vars)){
+      if(inherits(mat_vars, "data.frame")){
         is_num = sapply(mat_vars, function(x) is.numeric(x) || is.logical(x))
         if(any(!is_num)){
           pblm = names(mat_vars)[!is_num]
@@ -3162,7 +3162,7 @@ rep.fixest = function(x, times = 1, each = 1, vcov, ...){
 
   # Checking the arguments
   IS_LIST = FALSE
-  if("fixest_list" %in% class(x)){
+  if(inherits(x, "fixest_list")){
     IS_LIST = TRUE
     class(x) = "list"
 
@@ -3257,7 +3257,7 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
   check_arg(..., "mbt class(fixest) | list")
 
   dots = list(...)
-  if(all(sapply(dots, function(x) "fixest" %in% class(x)))){
+  if(all(sapply(dots, function(x) inherits(x, "fixest")))){
     class(dots) = "fixest_list"
 
     return(dots)
@@ -3265,13 +3265,13 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 
   if(length(dots) == 1){
 
-    if("fixest_multi" %in% class(dots[[1]])){
+    if(inherits(dots[[1]], "fixest_multi")){
       res = dots[[1]]
       class(res) = "fixest_list"
       return(res)
     }
 
-    if(all(sapply(dots[[1]], function(x) "fixest" %in% class(x)))){
+    if(all(sapply(dots[[1]], function(x) inherits(x, "fixest")))){
       res = dots[[1]]
       class(res) = "fixest_list"
       return(res)
@@ -3280,19 +3280,19 @@ rep.fixest_list = function(x, times = 1, each = 1, vcov, ...){
 
   res = list()
   for(i in seq_along(dots)){
-    if("fixest" %in% class(dots[[i]])){
+    if(inherits(dots[[i]], "fixest")){
       res[[length(res) + 1]] = dots[[i]]
     } else {
       obj = dots[[i]]
 
-      if("fixest_multi" %in% class(obj)){
+      if(inherits(obj, "fixest_multi")){
         for(j in seq_along(obj)){
           res[[length(res) + 1]] = obj[[j]]
         }
 
       } else {
         for(j in seq_along(obj)){
-          if(!"fixest" %in% class(obj[[j]])){
+          if(!inherits(obj[[j]], "fixest")){
             stop("In .l(...), each argument must be either a fixest object, or a list of fixest objects. Problem: The ", n_th(j), " element of the ", n_th(i), " argument (the latter being a list) is not a fixest object.")
           }
 
@@ -3524,7 +3524,7 @@ value2stringCall = function(value_raw, call = FALSE, check = FALSE, frame = NULL
   if(inherits(value_raw, "formula")){
     res = if(call) value_raw[[2]] else as.character(value_raw)[[2]]
 
-  } else if(any(c("call", "name") %in% class(value_raw))){
+  } else if(inherits(value_raw, c("call", "name"))){
     res = if(call) value_raw else deparse_long(value_raw)
 
   } else {
@@ -4568,7 +4568,7 @@ prepare_df = function(vars, data, fixef.keep_names = NA_integer_){
     data_list = try(eval(all_vars_call, data))
 
     # if error: we send it back to the main function
-    if("try-error" %in% class(data_list)){
+    if(inherits(data_list, "try-error")){
       return(data_list)
     }
 
@@ -6426,7 +6426,7 @@ trim_obs_removed = function(x, object){
 error_sender = function(expr, ..., clean, up = 0, arg_name){
   res = tryCatch(expr, error = function(e) structure(list(conditionCall(e), conditionMessage(e)), class = "try-error"))
 
-  if("try-error" %in% class(res)){
+  if(inherits(res, "try-error")){
     set_up(1 + up)
     msg = paste0(..., collapse = "")
 
@@ -6486,7 +6486,7 @@ check_set_types = function(x, types, msg){
   arg_name = deparse(substitute(x))
   check_arg(x, "os formula | character vector no na", .arg_name = arg_name, .up = 1)
 
-  if("formula" %in% class(x)){
+  if(inherits(x, "formula")){
     x = attr(terms(x), "term.labels")
   }
 

@@ -285,7 +285,7 @@ is_fixest_used = function(){
 
   for(f in fixest_files){
     f_created = file.mtime(f)
-    if("POSIXt" %in% class(f_created)){
+    if(inherits(f_created, "POSIXt")){
       d = as.numeric(difftime(now, f_created, units = "days"))
       if(d > 7){
         return(TRUE)

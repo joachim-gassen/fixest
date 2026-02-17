@@ -509,7 +509,7 @@ summary.fixest_multi = function(object, type = "etable", vcov = NULL, se = NULL,
 
     # In IV: multiple estimations can be returned
 
-    if("fixest_multi" %in% class(object[[1]])){
+    if(inherits(object[[1]], "fixest_multi")){
       tree = attr(object, "tree")
       object = setup_multi(object, tree = tree)
     }

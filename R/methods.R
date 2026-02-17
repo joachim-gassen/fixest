@@ -785,7 +785,7 @@ summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), vcov 
     }
 
     # we unroll in case of IV
-    if("fixest_multi" %in% class(my_res)){
+    if(inherits(my_res, "fixest_multi")){
       for(j in seq_along(my_res)){
         res[[length(res) + 1]] = my_res[[j]]
       }
@@ -2589,7 +2589,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
     sample = "estimation"
   }
 
-  if(!is.matrix(newdata) && !"data.frame" %in% class(newdata)){
+  if(!is.matrix(newdata) && !inherits(newdata, "data.frame")){
     stop("Argument 'newdata' must be a data.frame.")
   }
 
@@ -3703,7 +3703,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
   if(!missnull(data) && missing(type)){
     sc = sys.call()
     if(!"data" %in% names(sc)){
-      if(!is.null(data) && (is.character(data) || "formula" %in% class(data))){
+      if(!is.null(data) && (is.character(data) || inherits(data, "formula"))){
         # data is in fact the type
         type = data
         data = NULL
@@ -3747,7 +3747,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     data = as.data.frame(data)
   }
 
-  if(!"data.frame" %in% class(data)){
+  if(!inherits(data, "data.frame")){
     stop("The argument 'data' must be a data.frame or a matrix.")
   }
 

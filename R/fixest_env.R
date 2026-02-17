@@ -183,7 +183,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   lhs_bounds = list()
   if(origin_type == "feNmlm"){
     family_name = try(match.arg(family), silent = TRUE)
-    if("try-error" %in% class(family_name)){
+    if(inherits(family_name, "try-error")){
       #  then we try with deparse
       family_dep = deparse(mc_origin$family)
 
@@ -193,7 +193,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
       family_name = try(match.arg(family_dep, c("poisson", "negbin", "logit", "gaussian")), 
                         silent = TRUE)
-      if("try-error" %in% class(family_name)){
+      if(inherits(family_name, "try-error")){
         stop("Argument family must be equal to 'poisson', 'logit', 'negbin' or 'gaussian'.")
       }
     }
@@ -361,7 +361,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
         fixef_df = as.data.frame(fixef_df)
       }
 
-      if(!is.matrix(fixef_df) && !"data.frame" %in% class(fixef_df)){
+      if(!is.matrix(fixef_df) && !inherits(fixef_df, "data.frame")){
         stop("Argument fixef_df must be a vector, a matrix, a list or a data.frame (currently its class is {enum.bq ? class(fixef_df)}).")
       }
 
@@ -484,7 +484,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     }
 
     # The conversion of the data (due to data.table)
-    if(!"data.frame" %in% class(data)){
+    if(!inherits(data, "data.frame")){
       stop("The argument 'data' must be a data.frame or a matrix.")
     }
     
@@ -1050,7 +1050,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
       isSubset = TRUE
 
-      if("formula" %in% class(subset)){
+      if(inherits(subset, "formula")){
 
         if(isFit){
           stop("In ", origin, " the subset cannot be a formula. You must provide either an integer vector or a logical vector.")
@@ -1313,7 +1313,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
     if(isLinear){
 
-      if("data.frame" %in% class(X)){
+      if(inherits(X, "data.frame")){
         X = as.matrix(X)
       }
 
@@ -1572,7 +1572,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   msgNA_NL = ""
   if(!missnull(NL.fml)){
 
-    if(!"formula" %in% class(NL.fml)) stop("Argument 'NL.fml' must be a formula.")
+    if(!inherits(NL.fml, "formula")) stop("Argument 'NL.fml' must be a formula.")
     NL.fml = formula(NL.fml) # we regularize the formula
 
     isNonLinear = TRUE
@@ -1640,7 +1640,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(!is.null(offset)){
       isOffset = TRUE
 
-      if("formula" %in% class(offset)){
+      if(inherits(offset, "formula")){
 
         if(isFit){
           stop("In ", origin, " the offset cannot be a formula. You must provide a numeric vector.")
@@ -1732,7 +1732,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(!is.null(weights)){
       isWeight = TRUE
 
-      if("formula" %in% class(weights)){
+      if(inherits(weights, "formula")){
 
         if(isFit){
           stopi("In {origin} the weights cannot be a formula. You must provide a numeric vector.")
@@ -1880,7 +1880,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
     if(is.null(split.keep)) split.keep = attr(split, "keep")
     if(is.null(split.drop)) split.drop = attr(split, "drop")
 
-    if("formula" %in% class(split)){
+    if(inherits(split, "formula")){
 
       if(isFit){
         stop("In ", origin, " the split cannot be a formula. You must provide a numeric vector.")
@@ -4174,8 +4174,9 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
   if(!is.null(fml_iv_endo)){
     fml_linear = res$fml_all$linear
     fml_iv = res$fml_all$iv
-
-    is_pblm = "try-error" %in% class(try(str2lang(fml_iv_endo), silent = TRUE))
+    
+    test_fml_iv_endo = try(str2lang(fml_iv_endo), silent = TRUE)
+    is_pblm = inherits(test_fml_iv_endo, "try-error")
     if(is_pblm){
       # Avoids a bug
       fml_iv_endo = paste0("`", fml_iv_endo, "`")
@@ -4622,7 +4623,7 @@ collect_vars = function(...){
 
   for(i in seq_along(dots)){
     di = dots[[i]]
-    if("formula" %in% class(di)){
+    if(inherits(di, "formula")){
       vars = c(vars, all.vars(di))
     } else if(length(di) < 5 && is.character(di)){
       vars = c(vars, di)

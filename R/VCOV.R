@@ -2770,7 +2770,7 @@ is_function_in_it = function(x){
 #' @param ssc.type An object of class `ssc.type` obtained with the function [`ssc`].
 setFixest_ssc = function(ssc.type = ssc()){
 
-  if(!"ssc.type" %in% class(ssc.type)){
+  if(!inherits(ssc.type, "ssc.type")){
     stop("The argument 'ssc' must be an object created by the function ssc().")
   }
 
@@ -2781,7 +2781,7 @@ setFixest_ssc = function(ssc.type = ssc()){
 getFixest_ssc = function(){
 
   ssc = getOption("fixest_ssc")
-  if(!"ssc.type" %in% class(ssc)){
+  if(!inherits(ssc, "ssc.type")){
     stop("The value of getOption(\"fixest_ssc\") is currently not legal. Please use function setFixest_dict to set it to an appropriate value.")
   }
 

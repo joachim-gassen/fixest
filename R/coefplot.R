@@ -539,7 +539,7 @@ coefplot = function(..., objects = NULL, style = NULL, se, ci_low, ci_high, df.t
 
   old_style = style
   style = try(match.arg(style, choices = names(opts)), silent = TRUE)
-  if("try-error" %in% class(style)){
+  if(inherits(style, "try-error")){
     warning("Unknow style '", old_style, "', using default style instead.")
     style = "default"
   }
@@ -1799,7 +1799,7 @@ coefplot_prms = function(all_models, vcov = NULL, se, ci_low, ci_high, x, x.shif
                                  is_iplot = is_iplot, sep = sep, as.multiple = as.multiple), 
                    silent = TRUE)
 
-        if("try-error" %in% class(prms)){
+        if(inherits(prms, "try-error")){
           if(grepl("^[^\n]+(coefplot|iplot)", prms)){
             prms = stringmagic::string_clean(prms, "^[^\n]+\n")
           }

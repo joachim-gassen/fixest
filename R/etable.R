@@ -2196,7 +2196,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
     if(is_mult){
 
-      if("fixest_multi" %in% class(x)){
+      if(inherits(x, "fixest_multi")){
         for(i in seq_along(x)){
           all_models_bis[[length(all_models_bis) + 1]] = x[[i]]
         }
@@ -2346,7 +2346,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                 .value = n_models)
 
     el = extralines[[i]]
-    if("formula" %in% class(el)){
+    if(inherits(el, "formula")){
       el_tmp = extralines_extractor(el, el_names[i], tex = isTex)
       for(k in seq_along(el_tmp)){
         el_new[[names(el_tmp)[k]]] = el_tmp[[k]]
@@ -2445,7 +2445,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     fitstat_all = NULL
     drop.section = c(drop.section, "stats")
 
-  } else if("formula" %in% class(fitstat_all)){
+  } else if(inherits(fitstat_all, "formula")){
     check_arg(fitstat_all, "os formula", 
               .message = "Argument 'fitstat' must be a one sided formula (or a character vector) containing valid types from the function fitstat (see details in ?fitstat).")
 
@@ -5827,9 +5827,9 @@ check_set_path = function(x, type = "", create_dirs = TRUE, up = 0){
   x_dp = deparse(substitute(x))
 
   path = try(normalizePath(x, "/", mustWork = FALSE))
-  if("try-error" %in% class(path)){
+  if(inherits(path, "try-error")){
     path = try(normalizePath(paste0("./", x), "/", mustWork = FALSE))
-    if("try-error" %in% class(path)){
+    if(inherits(path, "try-error")){
       stop_up("The path ", x, " is not valid, please revise.")
     }
   }
@@ -7011,7 +7011,7 @@ insert = function(x, y, i){
 
 
 is_fixest_model = function(x){
-  any(c("fixest", "fixest_list", "fixest_multi") %in% class(x))
+  inherits(x, c("fixest", "fixest_list", "fixest_multi"))
 }
 
 
