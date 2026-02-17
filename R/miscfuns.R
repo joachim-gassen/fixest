@@ -3471,6 +3471,23 @@ demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 4
 #### Internal Funs ####
 ####
 
+invert_posdef_mat = function(x){
+  # x: symmetric posdef mat
+  # behavior: we do not throw error but rather we replace with NA values
+  info_inv = cpp_cholesky(x, tol = .Machine$double.xmin, nthreads = getFixest_nthreads())
+  
+  is_excluded = info_inv$id_excl
+  multicol = any(is_excluded)
+  
+  if(multicol){
+    x_inv = x * NA_real_
+    x_inv[!is_excluded, !is_excluded] = info_inv$XtX_inv
+  } else {
+    x_inv = info_inv$XtX_inv
+  }
+  
+  x_inv
+}
 
 # to avoid issues with packages redefining as.character.formula
 as.character.formula = function(x, ...) as.character.default(x, ...)
