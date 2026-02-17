@@ -1691,8 +1691,9 @@ kp_stat = function(x){
     a_qq = ssign(u_sub[1]) * u[1:l, k:l, drop = FALSE]
     b_qq = ssign(vt_sub[1]) * t(vt_k)
   } else {
-    a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt(u_sub %*% t(u_sub)))
-    b_qq = mat_sqrt(vt_sub %*% t(vt_sub)) %*% (solve(t(vt_sub)) %*% t(vt_k))
+    # u_sub %*% t(u_sub) = tcrossprod(u_sub)
+    a_qq = u[1:l, k:l] %*% (solve(u_sub) %*% mat_sqrt( tcrossprod(u_sub) ))
+    b_qq = mat_sqrt( tcrossprod(vt_sub) ) %*% (solve(t(vt_sub)) %*% t(vt_k))
   }
 
   # kronecker
