@@ -2005,7 +2005,7 @@ BIC.fixest = function(object, ...){
 #' information on the likelihoods in the details of the function [`femlm`].
 #'
 #' @return
-#' It returns a numeric scalar.
+#' It returns an object of class [`logLik`][stats::logLik].
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other 
@@ -2025,8 +2025,9 @@ BIC.fixest = function(object, ...){
 #'
 #'
 logLik.fixest = function(object, ...){
-
-  if(object$method_type == "feols"){
+  
+  is_ols = object$method_type == "feols"
+  if(is_ols){
     # if the summary is 'lean', then no way we can compute that
     resid = object$residuals
     if(is.null(resid)) resid = NA
@@ -2037,6 +2038,11 @@ logLik.fixest = function(object, ...){
   } else {
     ll = object$loglik
   }
+  
+  attr(ll, "nall") = object$nobs
+  attr(ll, "nobs") = object$nobs
+  attr(ll, "df") = object$nparams + is_ols
+  class(ll) = "logLik"
 
   ll
 }

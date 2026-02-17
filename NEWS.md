@@ -17,11 +17,14 @@
 
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
 
-## Changes
+## Other changes
 
 - VCOV: the test for non positive definite (PD) matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
 
 - VCOV: when the VCOV is not PD, the user is informed only if the regularized PD matrix is noticeably different (at least one difference larger than `1e-8`).
+
+- the `stats` method `logLik.fixest` now resembles `logLik.lm`.
+
 
 # fixest 0.13.2
 
