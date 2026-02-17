@@ -164,7 +164,7 @@ if(is.factor(data.frame(x = "bonjour")$x)){
 
 
 is_r_check = function(){
-  any(grepl("_R_CHECK", names(Sys.getenv()), fixed = TRUE))
+  sum(grepl("_R_CHECK", names(Sys.getenv()), fixed = TRUE)) > 10
 }
 
 

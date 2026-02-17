@@ -11,9 +11,11 @@
 
 - `update.fixest()` and `update.fixest_multi()` no longer throw a warning if `use_calling_env` is used (#619, @etiennebacher).
 
+- improve detection of R-checks to avoid wrongly setting the number of cores to 1. Thanks to @adamaltmejd for reporting, fixes #625.
+
 ## New features
 
-- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, inseadof column spans. It also errors more gracefully. This change is retro compatible. 
+- `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, insead of column spans. It also errors more gracefully. This change is retro compatible. 
 
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
 
