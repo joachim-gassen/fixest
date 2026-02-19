@@ -1554,7 +1554,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       qui = df1 + 1:df1 + ("(Intercept)" %in% names(res_second_stage$coefficients))
       my_coef = fit_wh$coefficients[qui]
       vcov_wh = fit_wh$xwx_inv[qui, qui] * cpp_ssq(fit_wh$residuals, weights) / df2
-      stat = drop(my_coef %*% solve(vcov_wh) %*% my_coef) / df1
+      stat = drop(my_coef %*% invert_posdef_mat(vcov_wh) %*% my_coef) / df1
       p = pf(stat, df1, df2, lower.tail = FALSE)
     }
 

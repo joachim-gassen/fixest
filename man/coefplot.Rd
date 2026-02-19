@@ -150,20 +150,7 @@ and/or to the function \code{plot} or \code{lines} (if \code{add = TRUE}).}
 
 \item{objects}{A list of \code{fixest} estimation objects, or \code{NULL} (default). If provided,
 the objects in \code{...} are ignored and the only coefficients reported are the ones in the
-argument \code{objects}.
-#' @param vcov Versatile argument to specify the VCOV.
-In general, it is either a character scalar equal to a VCOV type, either a formula of the form:
-vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"),
-"cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley".
-It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley and conley.
-It also accepts covariance matrices computed externally.
-Finally it accepts functions to compute the covariances.
-See the vcov documentation in the vignette.
-You can pass several VCOVs (as above) if you nest them into a list.
-If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
-If there is one model and several VCOVs, or if the first element of the list is equal to
-\code{"each"} or \code{"times"}, then the estimations will be replicated and the results
-for each estimation and each VCOV will be reported.}
+argument \code{objects}.}
 
 \item{style}{A character scalar giving the style of the plot to be used. You
 can set styles with the function \code{\link{setFixest_coefplot}}, setting all the default
@@ -191,6 +178,7 @@ It also accepts object from vcov_cluster, vcov_NW, NW, vcov_DK, DK, vcov_conley 
 It also accepts covariance matrices computed externally.
 Finally it accepts functions to compute the covariances.
 See the vcov documentation in the vignette.
+
 You can pass several VCOVs (as above) if you nest them into a list.
 If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
 If there is one model and several VCOVs, or if the first element of the list is equal to

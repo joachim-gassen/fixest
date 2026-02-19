@@ -39,6 +39,8 @@ reference:
         - etable
         - coefplot
         - iplot
+        - plot.fixest
+        - plot.fixest_multi
         - style.df
         - style.tex
         - extralines_register

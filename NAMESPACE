@@ -134,6 +134,10 @@ S3method(residuals, fixest_multi)
 S3method(update, fixest_multi)
 S3method(formula, fixest_multi)
 
+# graphics method
+S3method(plot, fixest_multi)
+S3method(plot, fixest)
+
 # nlme method
 S3method(fixef, fixest)
 

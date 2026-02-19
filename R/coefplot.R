@@ -23,7 +23,7 @@
 #' @param objects A list of `fixest` estimation objects, or `NULL` (default). If provided, 
 #' the objects in `...` are ignored and the only coefficients reported are the ones in the
 #' argument `objects`.
-#' #' @param vcov Versatile argument to specify the VCOV. 
+#' @param vcov Versatile argument to specify the VCOV. 
 #' In general, it is either a character scalar equal to a VCOV type, either a formula of the form:
 #'  vcov_type ~ variables. The VCOV types implemented are: "iid", "hetero" (or "HC1"), 
 #' "cluster", "twoway", "NW" (or "newey_west"), "DK" (or "driscoll_kraay"), and "conley". 
@@ -31,6 +31,7 @@
 #' It also accepts covariance matrices computed externally. 
 #' Finally it accepts functions to compute the covariances. 
 #' See the vcov documentation in the vignette.
+#' 
 #' You can pass several VCOVs (as above) if you nest them into a list. 
 #' If the number of VCOVs equals the number of models, eahc VCOV is mapped to the appropriate model.
 #' If there is one model and several VCOVs, or if the first element of the list is equal to
@@ -2857,14 +2858,101 @@ getFixest_coefplot = function(){
 
 
 
+####
+#### plot method ####
+####
 
 
 
+#' plot methods for `fixest` and `fixest_multi` objects
+#' 
+#' Plot method reporting the coefficient estimates and their confidence intervals. 
+#' This is a wrapper to the more complete functions [`coefplot`] and [`iplot`].
+#' 
+#' 
+#' @inheritParams coefplot
+#' @inheritSection etable Arguments keep, drop and order
+#' 
+#' @param x A `fixest` estimation, for example from [`feols`].
+#' @param ... Other arguments to be passed to [`coefplot`].
+#' 
+#' @details 
+#' By default `plot.fixest` runs [`coefplot`] unless the estimation includes 
+#' the function [`sunab`], in which case it uses [`iplot`].
+#' 
+#' The switch to `iplot` can be made with the argument `do_iplot = TRUE`.
+#' 
+#' @return 
+#' It returns invisibly the data used to create the graph.
+#' 
+#' @examples
+#' 
+#' #
+#' # Single estimation
+#' #
+#' 
+#' est = feols(Ozone ~ Temp + Solar.R, airquality)
+#' plot(est)
+#' 
+#' # focus only on the variables
+#' plot(est, drop = "Cons")
+#' 
+#' #
+#' # Multiple estimations
+#' #
+#' 
+#' est_mult = feols(Ozone ~ csw(Temp, Solar.R, Wind), airquality)
+#' plot(est_mult, drop = "Const")
+#' 
+#' #
+#' # DiD estimation: Sun & Abraham
+#' #
+#' 
+#' data(base_stagg)
+#' # The DiD estimation
+#' res_sunab = feols(y ~ x1 + sunab(year_treated, year) | id + year, base_stagg)
+#' plot(res_sunab)
+#' 
+#' 
+#' 
+#' 
+plot.fixest = function(x, vcov = NULL, add = FALSE, horiz = FALSE, do_iplot = NULL, dict = NULL, 
+                       keep = NULL, drop = NULL, order = NULL, 
+                       ci.width = "1%", ci_level = 0.95, plot_prms = list(),
+                       ylim = NULL, xlim = NULL,
+                       pch = c(20, 17, 15, 21, 24, 22), col = 1:8, cex = 1, lty = 1, lwd = 1,
+                       pt.pch = pch, pt.bg = NULL, pt.cex = cex, pt.col = col, 
+                       ci.col = col, pt.lwd = lwd, ci.lwd = lwd, ci.lty = lty, 
+                       main = "Effect on __depvar__", 
+                       value.lab = "Estimate and __ci__ Conf. Int.",
+                       ylab = NULL, xlab = NULL, sub = NULL, ...){
+  
+  check_arg(do_iplot, "NULL logical scalar")
+  
+  if(is.null(do_iplot)){
+    do_iplot = FALSE
+    if(inherits(x, "fixest") && isTRUE(x$is_sunab)){
+      do_iplot = TRUE
+      
+    } else if(inherits(x, "fixest_multi") && isTRUE(x[[1]]$is_sunab)){
+      do_iplot = TRUE
+      
+    }
+  }
+  
+  coefplot(objects = x, vcov = vcov, add = add, horiz = horiz, do_iplot = do_iplot, 
+           dict = dict, keep = keep, drop = drop, order = order, ci.width = ci.width, 
+           ci_level = ci_level, plot_prms = plot_prms, ylim = ylim, 
+           xlim = xlim, pch = pch, col = col, cex = cex, lty = lty, lwd = lwd, 
+           pt.pch = pt.pch, pt.bg = pt.bg, pt.cex = pt.cex, pt.col = pt.col, 
+           ci.col = ci.col, pt.lwd = pt.lwd, ci.lwd = ci.lwd, ci.lty = ci.lty, 
+           main = main, value.lab = value.lab, ylab = ylab, xlab = xlab, sub = sub, 
+           ...)
+  
+}
 
-
-
-
-
+#' @describeIn plot.fixest
+plot.fixest_multi = plot.fixest
 
 
 

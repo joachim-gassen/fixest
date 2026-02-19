@@ -1201,7 +1201,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
   df2 = x$nobs - x$nparams
 
   # The VCOV is always full rank in here
-  stat = drop(my_coef %*% solve(x$cov.scaled[qui, qui]) %*% my_coef) / df1
+  stat = drop(my_coef %*% invert_posdef_mat(x$cov.scaled[qui, qui]) %*% my_coef) / df1
   p = pf(stat, df1, df2, lower.tail = FALSE)
   vcov = attr(x$cov.scaled, "type")
   vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)

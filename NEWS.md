@@ -25,8 +25,9 @@
 
 - VCOV: when the VCOV is not PD, the user is informed only if the regularized PD matrix is noticeably different (at least one difference larger than `1e-8`).
 
-- the `stats` method `logLik.fixest` now resembles `logLik.lm`.
+- the `stats` method `logLik.fixest` now resembles `logLik.lm`
 
+- add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate
 
 # fixest 0.13.2
 
