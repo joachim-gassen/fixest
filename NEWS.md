@@ -19,6 +19,8 @@
 
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
 
+- in `coefplot`: the argument `zero` now adds 0 to the y-axis (instead of only turning highlighting on/off)
+
 ## Other changes
 
 - VCOV: the test for non positive definite (PD) matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
@@ -28,6 +30,7 @@
 - the `stats` method `logLik.fixest` now resembles `logLik.lm`
 
 - add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate
+
 
 # fixest 0.13.2
 
