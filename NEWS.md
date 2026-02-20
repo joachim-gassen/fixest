@@ -31,6 +31,8 @@
 
 - add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate
 
+- improve the display of the error messages in the main estimations
+
 
 # fixest 0.13.2
 

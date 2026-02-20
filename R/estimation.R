@@ -573,7 +573,8 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
 
     if(inherits(env, "try-error")){
-      stop(format_error_msg(env, "feols"))
+      err_msg = format_error_msg(env, "feols")
+      stopi("{err_msg}")
     }
 
     check_arg(only.env, "logical scalar")
@@ -2278,7 +2279,8 @@ feols.fit = function(y, X, fixef_df, vcov, offset, split, fsplit, split.keep, sp
   if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feols.fit", mc[["origin"]])
-    stop(format_error_msg(env, origin))
+    err_msg = format_error_msg(env, origin)
+    stopi("{err_msg}")
   }
 
   check_arg(only.env, "logical scalar")
@@ -2521,7 +2523,8 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
   if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feglm", mc[["origin"]])
-    stop(format_error_msg(env, origin))
+    err_msg = format_error_msg(env, origin)
+    stopi("{err_msg}")
   }
 
   check_arg(only.env, "logical scalar")
@@ -2626,7 +2629,8 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
                          mc_origin = match.call(), call_env = call_env, ...), silent = TRUE)
 
     if(inherits(env, "try-error")){
-      stop(format_error_msg(env, "feglm.fit"))
+      err_msg = format_error_msg(env, "feglm.fit")
+      stopi("{err_msg}")
     }
 
     check_arg(only.env, "logical scalar")
@@ -3557,7 +3561,8 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
                    env = env, ...), silent = TRUE)
 
   if(inherits(res, "try-error")){
-    stop(format_error_msg(res, "femlm"))
+    err_msg = format_error_msg(env, "femlm")
+    stopi("{err_msg}")
   }
 
   return(res)
@@ -3598,7 +3603,8 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
                    call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
   if(inherits(res, "try-error")){
-    stop(format_error_msg(res, "fenegbin"))
+    err_msg = format_error_msg(env, "fenegbin")
+    stopi("{err_msg}")
   }
 
   return(res)
@@ -3643,7 +3649,8 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
   if(inherits(res, "try-error")){
-    stop(format_error_msg(res, "fepois"))
+    err_msg = format_error_msg(env, "fepois")
+    stopi("{err_msg}")
   }
 
   return(res)
@@ -4082,7 +4089,8 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
   if(inherits(env, "try-error")){
     mc = match.call()
     origin = ifelse(is.null(mc[["origin"]]), "feNmlm", mc[["origin"]])
-    stop(format_error_msg(env, origin))
+    err_msg = format_error_msg(env, origin)
+    stopi("{err_msg}")
   }
 
   verbose = get("verbose", env)
@@ -4708,6 +4716,7 @@ est_env = function(env, y, X, weights, endo, inst){
 #### Delayed warnings and notes ####
 ####
 
+
 setup_multi_notes = function(){
   # We reset all the notes
   options("fixest_multi_notes" = NULL)
@@ -4828,7 +4837,7 @@ format_error_msg = function(x, origin){
   #   argument => likely I'll need a match.call argument
 
   x = gsub("\n+$", "", x)
-
+  
   if(grepl("^Error (in|:|: in) (fe|fixest|fun|fml_split|panel)[^\n]+\n", x)){
     res = gsub("^Error (in|:|: in) (fe|fixest|fun|fml_split|panel)[^\n]+\n *(.+)", "\\3", x)
   } else if(grepl("[Oo]bject '.+' not found", x) || grepl("memory|cannot allocate", x)) {
@@ -4838,7 +4847,8 @@ format_error_msg = function(x, origin){
                   origin, 
                   ". If you think your call to the function is legitimate, could you report?")
   }
-  res
+  
+  as.character(res)
 }
 
 
