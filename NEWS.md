@@ -17,6 +17,8 @@
 
 ## New features
 
+- THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (https://arxiv.org/abs/2601.21749).
+
 - `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, insead of column spans. It also errors more gracefully. This change is retro compatible. 
 
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
@@ -40,6 +42,8 @@
 - in multiple estimations, when a model cannot be estimated, the cause of the problem is kept for reporting
 
 - better handle PROTECT/UNPROTECT in to_index.cpp
+
+- remove calls to Rf_error (reported by @Enchufa2, #636)
 
 # fixest 0.13.2
 
