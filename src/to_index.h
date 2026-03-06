@@ -1,10 +1,11 @@
 
-
+#include <memory>
 #include <stdint.h>
 #include <cmath>
 #include <vector>
 #include <string>
 #include <algorithm>
+#include <Rcpp.h>
 #include <R.h>
 #include <Rinternals.h>
 
@@ -60,6 +61,11 @@ class IndexInputVector {
   
   void reset(){
     // we reset to the default values
+    
+    if(is_protect){
+      UNPROTECT(1);
+    }
+    
     is_fast_int = false;
     x_range = 0;
     x_range_bin = 0;
@@ -105,6 +111,12 @@ public:
   const int *px_int = (int *) nullptr;
   const double *px_dbl = (double *) nullptr;
   const intptr_t *px_intptr = (intptr_t *) nullptr;
+  
+  ~IndexInputVector(){
+    if(is_protect){
+      UNPROTECT(1);
+    }
+  }
   
 };
 
@@ -221,14 +233,16 @@ void to_index_main(const SEXP &x, IndexedVector &output);
 void to_index_main(const SEXP &x, IndexedVector &output,
                    const bool do_sum, const double *p_vec_to_sum);
 
-void to_index_main(const IndexInputVector &x, IndexedVector &output);
+void to_index_main(const std::shared_ptr<IndexInputVector> &x, IndexedVector &output);
 
-void to_index_main(const IndexInputVector &x, IndexedVector &output, 
+void to_index_main(const std::shared_ptr<IndexInputVector> &x, IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum);
 
-void to_index_main(const std::vector<IndexInputVector> &x, IndexedVector &output);
+void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &x, 
+                   IndexedVector &output);
 
-void to_index_main(const std::vector<IndexInputVector> &x, IndexedVector &output, 
+void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &x, 
+                   IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum);
 
 } // namespace indexthis

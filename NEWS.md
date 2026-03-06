@@ -39,6 +39,8 @@
 
 - in multiple estimations, when a model cannot be estimated, the cause of the problem is kept for reporting
 
+- better handle PROTECT/UNPROTECT in to_index.cpp
+
 # fixest 0.13.2
 
 ## Bug fixes
