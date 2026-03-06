@@ -685,12 +685,17 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
   res_all = list()
   type_all = type
+  
+  is_NA_model = isTRUE(x$NA_model)
 
   for(i in seq_along(type_all)){
     type = type_all[i]
-
+    
     # Big if
-    if(type == "n"){
+    if(is_NA_model){
+      res_all[[type]] = NA_real_
+      
+    } else if(type == "n"){
       res_all[[type]] = x$nobs
 
     } else if(type == "ll"){

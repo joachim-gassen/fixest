@@ -211,10 +211,20 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
   }
 
   if(isTRUE(x$iv)){
-    first_line = sma("TSLS estimation - Dep. Var.: {as.character(x$fml)[[2]]}\n",
-                     "                  Endo.    : {', 'c ? get_vars(x$iv_endo_fml)}\n",
-                     "                  Instr.   : {', 'c ? x$iv_inst_names}\n")
-    second_line = sma("{Nth.upper ? x$iv_stage} stage: Dep. Var.: ", as.character(x$fml)[[2]], "\n")
+    first_line = sma("TSLS estimation\n",
+                     "|- D.V.   : {x$iv_main_dep_var}\n",
+                     "|- Endo.  : {', 'c ? get_vars(x$iv_endo_fml)}\n",
+                     "|- Instr. : {', 'c ? x$iv_inst_names}\n",
+                     "|\n")
+                     
+    if(x$iv_stage == 1){
+      second_line = sma("|=> First Stage\n",
+                        "|   Current Dep. Var.: ", as.character(x$fml)[[2]], "\n")
+    } else {
+      second_line = sma("|=> Second Stage\n",
+                        "|   Dep. Var.: {x$iv_main_dep_var}\n")
+    }
+    
     catma(first_line, second_line)
   } else {
     depvar_name = as.character(x$fml)[[2]]
@@ -280,8 +290,13 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
       print_coeftable(head(coeftable, n), lastLine = last_line)
     }
   }
-
+  
   if(isTRUE(x$NA_model)){
+    
+    if(!is.null(x$cause_NA_model)){
+      catma("{x$cause_NA_model}")
+    }
+    
     return(invisible())
   }
 
@@ -528,6 +543,38 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
 
   if(isTRUE(object$onlyFixef) || isTRUE(object$NA_model)){
     # means that the estimation is done without variables
+    
+    # exception: asking for the 1st stage in NA models is natural
+    # => we abide
+    if(1 %in% stage){
+      stage_names = c()
+      res = list()
+      
+      for(s in seq_along(stage)){
+        if(stage[s] == 1){
+          for(i in seq_along(object$iv_first_stage)){
+            res[[length(res) + 1]] = object$iv_first_stage[[i]]
+            stage_names[length(stage_names) + 1] = paste0("First stage: ", 
+                                                          names(object$iv_first_stage)[i])
+          }
+
+        } else {
+          # We keep the information on clustering => matters for wald tests of 1st stage
+          res[[length(res) + 1]] = object
+          stage_names[length(stage_names) + 1] = "Second stage"
+        }
+      }
+
+      if(length(res) == 1){
+        return(res[[1]])
+      }
+
+      values = list("iv" = stage_names)
+      res_multi = setup_multi(res, values)
+      attr(res_multi, "print_request") = "long"
+      return(res_multi)
+    }
+    
     return(object)
   }
 

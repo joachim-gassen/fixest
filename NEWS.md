@@ -13,6 +13,8 @@
 
 - improve detection of R-checks to avoid wrongly setting the number of cores to 1. Thanks to @adamaltmejd for reporting, fixes #625.
 
+- fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the intruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by @willwwang, #604
+
 ## New features
 
 - `etable`: arguments `extralines` and `headers` are more robust and the behavior is slightly modified. You can now position the values using integer indexes which give the columns position, insead of column spans. It also errors more gracefully. This change is retro compatible. 
@@ -33,6 +35,9 @@
 
 - improve the display of the error messages in the main estimations
 
+- improve the display of TSLS estimations (now always show the main dependent variable)
+
+- in multiple estimations, when a model cannot be estimated, the cause of the problem is kept for reporting
 
 # fixest 0.13.2
 

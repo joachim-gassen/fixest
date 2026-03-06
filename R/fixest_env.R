@@ -4633,10 +4633,10 @@ collect_vars = function(...){
   unique(vars)
 }
 
-fixest_NA_results = function(env){
+fixest_NA_results = function(env, cause = NULL){
   # Container for NA results
   # so far the non-linear part is not covered
-
+  
   res = get("res", env)
 
   X = get("linear.mat", env)
@@ -4666,6 +4666,84 @@ fixest_NA_results = function(env){
   res$ssr = res$ssr_null = res$ssr_fe_only = res$sigma2 = res$loglik = res$ll_null = res$ll_fe_only = res$pseudo_r2 = res$deviance = res$sq.cor = NA_real_
 
   res$NA_model = TRUE
+  res$cause_NA_model = cause
+  class(res) = "fixest"
+
+  res
+}
+
+fixest_NA_results_IV = function(env_2nd_stage, res_first_stage, cause = NULL){
+  # Container for NA results
+  # => we need to reconstruct
+  
+  res = get("res", env_2nd_stage)
+  
+  # general information
+  iv_lhs = get("iv_lhs", env_2nd_stage)
+  iv_lhs_names = get("iv_lhs_names", env_2nd_stage)
+  ZX = iv.mat = get("iv.mat", env_2nd_stage)
+  iv_main_dep_var = deparse(res$fml[[2]], width.cutoff = 100)[1]
+  
+  #
+  # 1st stages
+  #
+  
+  n_endo = length(iv_lhs_names)
+  i_start = length(res_first_stage) + 1
+  
+  if(i_start <= n_endo){
+    for(i in i_start:n_endo){
+      current_env = reshape_env(env_2nd_stage, lhs = iv_lhs[[i]], rhs = ZX, 
+                                fml_iv_endo = iv_lhs_names[i])
+      my_res = fixest_NA_results(current_env, cause)
+      
+      my_res$ssr_no_inst = NA_real_
+      my_res$iv_stage = 1
+      my_res$iv_inst_names_xpd = colnames(iv.mat)
+      res_first_stage[[iv_lhs_names[i]]] = my_res
+    }
+  }
+  
+  #
+  # 2nd stage
+  #
+  
+
+  X = get("linear.mat", env_2nd_stage)
+
+  n = ncol(X)
+  NA_values = rep(NA_real_, n)
+
+  coef = se = NA_values
+  names(coef) = names(se) = colnames(X)
+
+  coeftable = data.frame("Estimate" = NA_values, "Std. Error" = NA_values, 
+                         "t value" = NA_values, "Pr(>|t|)" = NA_values)
+  names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
+  row.names(coeftable) = names(coef)
+
+  cov.scaled = matrix(NA, n, n)
+
+  attr(se, "type") = attr(coeftable, "type") = attr(cov.scaled, "type") = "Void"
+  res$coeftable = coeftable
+  res$se = se
+  res$cov.scaled = cov.scaled
+
+  res$summary = TRUE
+
+  # Fit stats
+  res$nobs = nrow(X)
+  res$ssr = res$ssr_null = res$ssr_fe_only = res$sigma2 = res$loglik = res$ll_null = res$ll_fe_only = res$pseudo_r2 = res$deviance = res$sq.cor = res$ssr_no_endo = NA_real_
+  
+  # extra information
+  res$iv_first_stage = res_first_stage
+  res$iv_stage = 2
+  res$iv_inst_names_xpd = res_first_stage[[1]]$iv_inst_names_xpd
+  res$iv_endo_names_fit = paste0("fit_", res$iv_endo_names)
+  res$iv_main_dep_var = iv_main_dep_var
+
+  res$NA_model = TRUE
+  res$cause_NA_model = cause
   class(res) = "fixest"
 
   res

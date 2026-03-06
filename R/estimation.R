@@ -536,15 +536,19 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       # I can't really mutualize these three lines of code since the verbose
       # needs to be checked before using it, and here it's an internal call
       time_start = proc.time()
-      gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], 
-                      "s", ifelse(nl, "\n", ""), sep = "")
+      show_timing = function(x, nl = TRUE){
+        cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], 
+            "s", ifelse(nl, "\n", ""), sep = "")
+      }
       t0 = proc.time()
     }
 
   } else {
     time_start = proc.time()
-    gt = function(x, nl = TRUE) cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", 
-                    ifelse(nl, "\n", ""), sep = "")
+    show_timing = function(x, nl = TRUE){
+      cat(sfill(x, 20), ": ", -(t0 - (t0<<-proc.time()))[3], "s", 
+          ifelse(nl, "\n", ""), sep = "")
+    }
     t0 = proc.time()
 
     # we use fixest_env for appropriate controls and data handling
@@ -629,7 +633,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
 
     verbose = get("verbose", env)
-    if(verbose >= 2) gt("Setup")
+    if(verbose >= 2) show_timing("Setup")
   }
 
   isFixef = get("isFixef", env)
@@ -1208,18 +1212,19 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   if(do_iv){
     assign("do_iv", FALSE, env)
     assign("verbose", 0, env)
-
+    
     # Loaded already
     # y: lhs
     # X: linear.mat
-
+    
     iv_lhs = get("iv_lhs", env)
     iv_lhs_names = get("iv_lhs_names", env)
     iv.mat = get("iv.mat", env) # we enforce (before) at least one variable in iv.mat
     K = ncol(iv.mat)
     n_endo = length(iv_lhs)
     lean = get("lean", env)
-
+    iv_main_dep_var = deparse(env$res$fml[[2]], width.cutoff = 100)[1]
+    
     # Simple check that the function is not misused
     pblm = intersect(iv_lhs_names, colnames(X))
     if(length(pblm) > 0){
@@ -1231,12 +1236,18 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
 
     if(isFixef){
+      
+      ####
+      #### IV with fixef ####
+      ####
+      
+      
       # we batch demean first
 
       n_vars_X = if(is.null(ncol(X))) 0 else ncol(X)
 
       if(mem.clean) gc()
-
+      
       if(!is.null(dots$iv_products)){
         # means this is a call from multiple LHS/RHS
 
@@ -1305,9 +1316,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         ZX_demean = cbind(iv.mat_demean, X_demean)
         ZX = cbind(iv.mat, X)
       }
-
+      
+      #
       # First stage(s)
-
+      #
+      
       ZXtZX = iv_products$ZXtZX
       ZXtu  = iv_products$ZXtu
 
@@ -1319,7 +1332,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
                        X_demean = ZX_demean, y_demean = iv_lhs_demean[[i]],
                        add_fitted_demean = TRUE, iv_call = TRUE, notes = FALSE)
-
+        
         # For the F-stats
         if(n_vars_X == 0 || no_X_Fstat){
           my_res$ssr_no_inst = cpp_ssq(iv_lhs_demean[[i]], weights)
@@ -1329,16 +1342,47 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
                                 xwx = iv_products$XtX, xwy = ZXtu[[i]][-(1:K)])
           my_res$ssr_no_inst = cpp_ssq(fit_no_inst$residuals, weights)
         }
-
+        
         my_res$iv_stage = 1
+        my_res$iv_main_dep_var = iv_main_dep_var
         my_res$iv_inst_names_xpd = colnames(iv.mat)
-
         res_first_stage[[iv_lhs_names[i]]] = my_res
+        
+        # Checking errors
+        error_endo_no_variation = my_res$ssr < 1e-10
+        error_inst_no_expl = abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10
+        if(error_endo_no_variation || error_inst_no_expl){
+          # we keep the information on this first stage => useful for reporting
+          
+          if(error_endo_no_variation){
+            msg = sma("[IV error] The endogenous variable {bq ? iv_lhs_names[i]} is ",
+                      "fully explained by the exogenous variables and the instruments. ",
+                      "Please revise the model.")
+            
+          } else if(error_inst_no_expl){
+            msg = sma("[IV error] The instruments have 0 explanatory power ", 
+                      "for the endogenous variable {bq ? iv_lhs_names[i]}. ",
+                      "Please revise the model.")
+          }
+          
+          
+          if(IN_MULTI){
+            stack_multi_notes(msg)
+            return(fixest_NA_results_IV(env, res_first_stage, msg))
+            
+          } else {
+            stopi("{msg}")
+          }
+          
+        }
+        
       }
 
-      if(verbose >= 2) gt("1st stage(s)")
-
+      if(verbose >= 2) show_timing("1st stage(s)")
+      
+      #
       # Second stage
+      #
 
       if(n_endo == 1){
         res_FS = res_first_stage[[1]]
@@ -1394,7 +1438,10 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       }
 
     } else {
-      # fixef == FALSE
+      
+      ####
+      #### IV without fixef ####
+      ####
 
       is_X = length(X) > 1
       if(!is_X){
@@ -1412,12 +1459,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
       }
 
-      if(verbose >= 2) gt("IV products")
+      if(verbose >= 2) show_timing("IV products")
 
       ZX = if(is_X) cbind(iv.mat, X) else iv.mat
-
+      
+      #
       # First stage(s)
-
+      #
+      
       ZXtZX = iv_products$ZXtZX
       ZXtu  = iv_products$ZXtu
 
@@ -1435,14 +1484,14 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         }
 
       }
-
+      
       res_first_stage = list()
 
       for(i in 1:n_endo){
         current_env = reshape_env(env, lhs = iv_lhs[[i]], rhs = ZX, fml_iv_endo = iv_lhs_names[i])
         my_res = feols(env = current_env, xwx = ZXtZX, xwy = ZXtu[[i]],
                        iv_call = TRUE, notes = FALSE)
-
+        
         # For the F-stats
         if(is_X){
           fit_no_inst = ols_fit(iv_lhs[[i]], X, w = weights, correct_0w = FALSE,
@@ -1453,17 +1502,48 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
         } else {
           my_res$ssr_no_inst = cpp_ssr_null(iv_lhs[[i]], weights)
         }
-
+        
         my_res$iv_stage = 1
+        my_res$iv_main_dep_var = iv_main_dep_var
         my_res$iv_inst_names_xpd = colnames(iv.mat)
-
         res_first_stage[[iv_lhs_names[i]]] = my_res
+        
+        # Checking errors
+        error_endo_no_variation = my_res$ssr < 1e-10
+        error_inst_no_expl = abs(my_res$ssr - my_res$ssr_no_inst) < 1e-10
+        if(error_endo_no_variation || error_inst_no_expl){
+          # we keep the information on this first stage => useful for reporting
+          
+          if(error_endo_no_variation){
+            msg = sma("[IV error] The endogenous variable {bq ? iv_lhs_names[i]} is ",
+                      "fully explained by the exogenous variables and the instruments. ",
+                      "Please revise the model.")
+            
+          } else if(error_inst_no_expl){
+            msg = sma("[IV error] The instruments have 0 explanatory power ", 
+                      "for the endogenous variable {bq ? iv_lhs_names[i]}. ",
+                      "Please revise the model.")
+          }
+          
+          
+          if(IN_MULTI){
+            stack_multi_notes(msg)
+            return(fixest_NA_results_IV(env, res_first_stage, msg))
+            
+          } else {
+            stopi("{msg}")
+          }
+          
+        }
+        
       }
 
-      if(verbose >= 2) gt("1st stage(s)")
-
+      if(verbose >= 2) show_timing("1st stage(s)")
+      
+      #
       # Second stage
-
+      #
+      
       if(n_endo == 1){
         res_FS = res_first_stage[[1]]
         U = as.matrix(res_FS$fitted.values)
@@ -1481,7 +1561,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       colnames(U) = paste0("fit_", iv_lhs_names)
 
       UX = if(is_X) cbind(U, X) else U
-
+      
       XtX = iv_products$XtX
       Xty = iv_products$Xty
       iv_prod_second = cpp_iv_product_completion(XtX = XtX, Xty = Xty, X = X,
@@ -1501,7 +1581,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       }
 
       resid_s1 = lapply(res_first_stage, function(x) x$residuals)
-
+      
       current_env = reshape_env(env, rhs = UX)
       res_second_stage = feols(env = current_env, xwx = UXtUX, xwy = UXty,
                                resid_1st_stage = resid_s1, iv_call = TRUE, notes = FALSE)
@@ -1518,7 +1598,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     }
 
-    if(verbose >= 2) gt("2nd stage")
+    if(verbose >= 2) show_timing("2nd stage")
 
     #
     # Wu-Hausman endogeneity test
@@ -1642,6 +1722,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     # meta info
     res_second_stage$iv_stage = 2
+    res_second_stage$iv_main_dep_var = iv_main_dep_var
 
     return(res_second_stage)
 
@@ -1799,12 +1880,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     if(verbose >= 1){
       if(length(fixef_sizes) > 1){
-        gt("Demeaning", FALSE)
+        show_timing("Demeaning", FALSE)
         cat(" (iter: ", paste0(c(tail(res$iterations, 1), 
                                  res$iterations[-length(res$iterations)]), collapse = ", "), ")\n", 
             sep = "")
       } else {
-        gt("Demeaning")
+        show_timing("Demeaning")
       }
     }
   }
@@ -1851,7 +1932,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
           }
         }
 
-        return(fixest_NA_results(env))
+        return(fixest_NA_results(env, msg))
 
       } else {
         stop_up(msg, up = 1 * fromGLM)
@@ -1889,7 +1970,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
   time_post = proc.time()
   if(verbose >= 1){
-    gt("Estimation")
+    show_timing("Estimation")
   }
 
   if(mem.clean){
@@ -1921,7 +2002,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
       } else {
         mema(msg)
       }
-
+      
     }
 
     res$collin.var = var_collinear
@@ -1930,7 +2011,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     collin.coef = setNames(rep(NA, length(RHS_names)), RHS_names)
     collin.coef[!est$is_excluded] = res$coefficients
     res$collin.coef = collin.coef
-
+    
     if(isFixef){
       X = X[, !est$is_excluded, drop = FALSE]
     }
@@ -1938,7 +2019,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 
     collin.adj = sum(est$is_excluded)
   }
-
+  
   n = length(y)
   res$nparams = res$nparams - collin.adj - rm_depvar
   df_k = res$nparams
@@ -1953,6 +2034,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   resid_origin = NULL
   if(!is.null(dots$resid_1st_stage)){
     # We correct the residual
+    mema("iv resids")
     is_int = "(Intercept)" %in% names(res$coefficients)
     resid_origin = res$residuals
     resid_new = cpp_iv_resid(res$residuals, res$coefficients, 
@@ -2062,7 +2144,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     }
   }
 
-  if(verbose >= 3) gt("Post-processing")
+  if(verbose >= 3) show_timing("Post-processing")
 
   class(res) = "fixest"
 
@@ -2097,7 +2179,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
 ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL,
                    xwy = NULL, only.coef = FALSE){
   # No control here -- done before
-
+  
   if(is.null(xwx)){
     info_products = cpp_sparse_products(X, w, y, correct_0w, nthreads)
     xwx = info_products$XtX
@@ -2106,7 +2188,7 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
 
   multicol = FALSE
   info_inv = cpp_cholesky(xwx, collin.tol, nthreads)
-
+  
   if(!is.null(info_inv$all_removed)){
     # Means all variables are collinear! => can happen when using FEs
     return(list(all_removed = TRUE))
@@ -2141,8 +2223,8 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
   residuals = y - fitted.values
 
   res = list(xwx = xwx, coefficients = beta, fitted.values = fitted.values,
-         xwx_inv = xwx_inv, multicol = multicol, residuals = residuals,
-         is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
+             xwx_inv = xwx_inv, multicol = multicol, residuals = residuals,
+             is_excluded = is_excluded, collin.min_norm = info_inv$min_norm)
 
   res
 }
@@ -4259,7 +4341,8 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
                          iter, ". Reason: ", gsub("^[^\n]+\n *(.+\n)", "\\1", opt))
     if(IN_MULTI){
       stack_multi_notes(warning_msg)
-      return(fixest_NA_results(env))
+      return(fixest_NA_results(env, warning_msg))
+      
     } else if(!"coef_evaluated" %in% names(env)){
       # big problem right from the start
       stop(warning_msg)

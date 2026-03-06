@@ -283,6 +283,17 @@ data(trade)
 test(feols(Euros ~ log(dist_km) | Destination + Origin + Product, 
            trade, fixef.iter = 1), "warn")
 
+# IV with ill defined instrument or endogenous regressors
+df_poor_endo = data.frame(y = runif(10), endog = 1, inst = rnorm(10), exo = rnorm(10))
+test(feols(y ~ 1 | endog ~ inst, df_poor_endo), "err")
+# we just check no error:
+feols(y ~ sw0(exo) | endog ~ inst, df_poor_endo)
+
+df_poor_inst = data.frame(y = runif(10), endog = rnorm(10), inst = 0, exo = rnorm(10))
+test(feols(y ~ 1 | endog ~ inst, df_poor_inst), "err")
+# we just check no error:
+feols(y ~ sw0(exo) | endog ~ inst, df_poor_inst)
+
 
 ####
 #### ... depvar removal ####
