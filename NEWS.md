@@ -1,5 +1,5 @@
 
-# fixest 0.13.3
+# fixest 0.14.0
 
 ## Bug fixes
 
