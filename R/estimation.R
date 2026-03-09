@@ -2034,7 +2034,6 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
   resid_origin = NULL
   if(!is.null(dots$resid_1st_stage)){
     # We correct the residual
-    mema("iv resids")
     is_int = "(Intercept)" %in% names(res$coefficients)
     resid_origin = res$residuals
     resid_new = cpp_iv_resid(res$residuals, res$coefficients, 

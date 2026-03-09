@@ -3474,6 +3474,11 @@ demeaning_algo = function(extraProj = 0, iter_warmup = 15, iter_projAfterAcc = 4
 invert_posdef_mat = function(x){
   # x: symmetric posdef mat
   # behavior: we do not throw error but rather we replace with NA values
+  
+  if(!is.matrix(x)){
+    x = as.matrix(x)
+  }
+  
   info_inv = cpp_cholesky(x, tol = .Machine$double.xmin, nthreads = getFixest_nthreads())
   
   is_excluded = info_inv$id_excl
