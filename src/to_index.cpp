@@ -1098,8 +1098,8 @@ SEXP cpp_to_index(SEXP &x){
   //
   
   // we copy the first observations into an R vector
-  SEXP first_obs = indexthis::to_r_vector(index_info.get_firstobs());
-  SEXP table = indexthis::to_r_vector(index_info.get_table());
+  SEXP first_obs = PROTECT(indexthis::to_r_vector(index_info.get_firstobs()));
+  SEXP table = PROTECT(indexthis::to_r_vector(index_info.get_table()));
   
   // we save the results into a list
   SEXP res = PROTECT(Rf_allocVector(VECSXP, 3));
@@ -1110,7 +1110,7 @@ SEXP cpp_to_index(SEXP &x){
   // names
   Rf_setAttrib(res, R_NamesSymbol, indexthis::std_string_to_r_string({"index", "first_obs", "table"}));
     
-  UNPROTECT(2);
+  UNPROTECT(4);
   
   return res;
   
