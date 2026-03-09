@@ -831,7 +831,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     bread = VCOV_raw_forced
 
   }
-
+  
   ####
   #### ... vcov ####
   ####
@@ -874,7 +874,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   ####
   #### ... vcov attributes ####
   ####
-
+  
   # After discussing, we decided that since this test is relatively cheap, we will do it every time.
   eigenvalues = eigen(vcov_mat, symmetric = TRUE, only.values = TRUE)$values
   if(any(eigenvalues <= 0)){
@@ -1937,7 +1937,7 @@ vcov_hc2_hc3_internal = function(bread, scores, sandwich, nthreads, vcov_name,
   
   # we don't allow ssc changes => HC2/HC3 **are** SSCs
   
-  # For HC2/ HC3, need to divide scores by the hatvalues
+  # For HC2/HC3, need to divide scores by the hatvalues
   if (isTRUE(object$iv)) {
     stopi("The VCOV type {bq ? vcov_name} is not defined in IV estimations.")
   }
@@ -1948,6 +1948,7 @@ vcov_hc2_hc3_internal = function(bread, scores, sandwich, nthreads, vcov_name,
   if (length(problem_idx) > 0L) {
 
     stopi("When calculating the diagonals of the projection matrix, {n ? problem_idx} value{$s, were} found to equal 1. This is most likely due to dummy variables/fixed-effects with only 1 observation, so that removing that observation would make that coefficient non-estimable. \nThe problematic row{$s, are}: {enum ? problem_idx}.")
+    
   }
 
   if (vcov_name == "hc2") {

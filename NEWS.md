@@ -15,6 +15,8 @@
 
 - fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the intruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by @willwwang, #604
 
+- remove unwanted warnings when using VCOV HC2/HC3.
+
 ## New features
 
 - THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (https://arxiv.org/abs/2601.21749).

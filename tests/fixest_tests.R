@@ -9,7 +9,6 @@
 # Some functions are not trivial to test properly though
 
 library(fixest)
-library(sandwich)
 
 test = fixest:::test ; chunk = fixest:::chunk
 vcovClust = fixest:::vcovClust
@@ -1427,8 +1426,8 @@ test(se(est_feols, se = "st")["x"], se(est_lm)["x"])
 # Heteroskedasticity-robust
 #
 
-se_white_lm_HC1 = sqrt(vcovHC(est_lm, type = "HC1")["x", "x"])
-se_white_lm_HC0 = sqrt(vcovHC(est_lm, type = "HC0")["x", "x"])
+se_white_lm_HC1 = sqrt(sandwich::vcovHC(est_lm, type = "HC1")["x", "x"])
+se_white_lm_HC0 = sqrt(sandwich::vcovHC(est_lm, type = "HC0")["x", "x"])
 
 test(se(est_feols, se = "hetero"), se_white_lm_HC1)
 test(se(est_feols, se = "hetero", ssc = ssc(K.adj = FALSE, G.adj = FALSE)), se_white_lm_HC0)
@@ -1439,8 +1438,8 @@ test(se(est_feols, se = "hetero", ssc = ssc(K.adj = FALSE, G.adj = FALSE)), se_w
 #
 
 # Clustered by grp
-se_CL_grp_lm_HC1 = sqrt(vcovCL(est_lm, cluster = d$grp, type = "HC1")["x", "x"])
-se_CL_grp_lm_HC0 = sqrt(vcovCL(est_lm, cluster = d$grp, type = "HC0")["x", "x"])
+se_CL_grp_lm_HC1 = sqrt(sandwich::vcovCL(est_lm, cluster = d$grp, type = "HC1")["x", "x"])
+se_CL_grp_lm_HC0 = sqrt(sandwich::vcovCL(est_lm, cluster = d$grp, type = "HC0")["x", "x"])
 
 # How to get the lm
 test(se(est_feols, ssc = ssc(K.fixef = "full")), se_CL_grp_lm_HC1)
@@ -1451,7 +1450,7 @@ test(se(est_feols, ssc = ssc(K.adj = FALSE, K.fixef = "full")), se_CL_grp_lm_HC0
 #
 
 # Clustered by grp & tm
-se_CL_2w_lm    = sqrt(vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x"])
+se_CL_2w_lm    = sqrt(sandwich::vcovCL(est_lm, cluster = ~ grp + tm, type = "HC1")["x", "x"])
 se_CL_2w_feols = se(est_feols, se = "twoway")
 
 test(se(est_feols, se = "twoway", ssc = ssc(K.fixef = "full", G.df = "conv")), se_CL_2w_lm)
@@ -2180,26 +2179,26 @@ chunk("SANDWICH")
 
 # Compatibility with sandwich
 
-library(sandwich)
-
 data(base_did)
 est = feols(y ~ x1 + I(x1**2) + factor(id), base_did)
 
-test(vcov(est, cluster = ~id), vcovCL(est, cluster = ~id, type = "HC1"))
+test(vcov(est, cluster = ~id), sandwich::vcovCL(est, cluster = ~id, type = "HC1"))
 
 est_pois = fepois(as.integer(y) + 20 ~ x1 + I(x1**2) + factor(id), base_did)
 
-test(vcov(est_pois, cluster = ~id), vcovCL(est_pois, cluster = ~id, type = "HC1"))
+test(vcov(est_pois, cluster = ~id), sandwich::vcovCL(est_pois, cluster = ~id, type = "HC1"))
 
 # With FEs
 
 est = feols(y ~ x1 + I(x1**2) | id, base_did)
 
-test(vcov(est, cluster = ~id, ssc = ssc(K.adj = FALSE)), vcovCL(est, cluster = ~id))
+test(vcov(est, cluster = ~id, ssc = ssc(K.adj = FALSE)), 
+     sandwich::vcovCL(est, cluster = ~id))
 
 est_pois = fepois(as.integer(y) + 20 ~ x1 + I(x1**2) | id, base_did)
 
-test(vcov(est_pois, cluster = ~id, ssc = ssc(K.adj = FALSE)), vcovCL(est_pois, cluster = ~id))
+test(vcov(est_pois, cluster = ~id, ssc = ssc(K.adj = FALSE)), 
+     sandwich::vcovCL(est_pois, cluster = ~id))
 
 
 

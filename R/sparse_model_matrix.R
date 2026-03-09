@@ -125,9 +125,9 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
   } 
 
   # na.rm = FALSE doesn't work with type = "fixef" (which FE col gets NA?)
-  if (("fixef" %in% type & !na.rm)) {
-    # na.rm = TRUE
+  if (("fixef" %in% type && !na.rm && !(sample == "estimation"))) {
     message("na.rm = FALSE doesn't work with type = 'fixef'. It has been set to TRUE.")
+    na.rm = TRUE
   }
 
   # Panel setup
@@ -209,8 +209,10 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
         xi = fixef_df[[fe_var]]
 
         keep = which(!is.na(xi))
-        if (length(keep) == 0) stop("All values of the fixed-effect variable '", fe_var, "' are NA.")
-
+        if (length(keep) == 0){
+          stop("All values of the fixed-effect variable '", fe_var, "' are NA.")
+        }
+        
         xi = xi[keep]
         index_info = to_index_internal(xi, add_items = TRUE)
 
