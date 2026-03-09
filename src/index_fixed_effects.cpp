@@ -139,11 +139,11 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
     all_indexes_sexp[q] = PROTECT(Rf_allocVector(INTSXP, n_obs));
   }
   
-  std::vector< std::shared_ptr<indexthis::IndexInputVector> > all_input_vectors(Q);
+  std::vector< indexthis::IndexInputVector > all_input_vectors(Q);
   std::vector<indexthis::IndexedVector> all_index_info(Q);
   for(int q = 0 ; q < Q ; ++q){
     const SEXP &fixef_vec = VECTOR_ELT(fixef_list, q);
-    all_input_vectors[q]->initialize(fixef_vec);
+    all_input_vectors[q].initialize(fixef_vec);
     
     all_index_info[q].initialize(all_indexes_sexp[q]);
   }
@@ -163,7 +163,7 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
   while(keep_running){
     keep_running = false;
     
-    const int n_current = all_input_vectors[0]->size();
+    const int n_current = all_input_vectors[0].size();
     bool any_removed = false;
     std::vector< std::vector<int> > all_firstobs_rm_new(Q);
     
@@ -174,7 +174,7 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
     #pragma omp parallel for num_threads(nthreads)
     for(int q = 0 ; q < Q ; ++q){
       
-      const std::shared_ptr<indexthis::IndexInputVector> &pfixef_vec = all_input_vectors[q];
+      const indexthis::IndexInputVector &pfixef_vec = all_input_vectors[q];
       indexthis::IndexedVector &index_info = all_index_info[q];
       
       indexthis::to_index_main(pfixef_vec, index_info, do_sum_y, p_y);
@@ -257,7 +257,7 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
         }
         
         all_raw_input_vectors[q] = std::move(new_input);
-        all_input_vectors[q]->initialize(all_raw_input_vectors[q]);
+        all_input_vectors[q].initialize(all_raw_input_vectors[q]);
         
       }
       

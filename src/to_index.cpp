@@ -142,27 +142,9 @@ void IndexInputVector::initialize(const SEXP &x){
     }
     
   } else {
-    // we apply a conversion to a known type
+    // error
     
-    if(TYPEOF(x) == CHARSXP || TYPEOF(x) == LGLSXP || TYPEOF(x) == INTSXP || 
-      TYPEOF(x) == REALSXP || TYPEOF(x) == CPLXSXP || TYPEOF(x) == STRSXP || TYPEOF(x) == RAWSXP){
-      // we convert to character
-  
-      int any_error;
-      this->x_conv = PROTECT(R_tryEval(Rf_lang2(Rf_install("as.character"), x), R_GlobalEnv, &any_error));
-      this->is_protect = true;
-
-      if(any_error){
-        Rcpp::stop("In `to_index`, the vector to index was not standard (int or real, etc) and failed to be converted to character before applying indexation._n");
-      }
-      
-      // conversion succeeded
-      this->type = T_STR;
-      this->px_intptr = (intptr_t *) STRING_PTR_RO(this->x_conv);
-      
-    } else {
-      Rcpp::stop("In `to_index`, the R vectors must be atomic. The current type is not valid.");
-    }    
+    Rcpp::stop("Internal error: Only vectors of type character, numeric, logical or factor can be converted to an index.");
     
   }
 }
@@ -672,7 +654,7 @@ inline void update_index_intarray_g_obs(int id, size_t i, int &g, int * &int_arr
   }  
 }
 
-void multiple_ints_to_index(const vector<std::shared_ptr<IndexInputVector>> &all_pvecs, vector<int> &all_k, 
+void multiple_ints_to_index(const vector<IndexInputVector> &all_vecs, vector<int> &all_k, 
                             int *__restrict p_index, int &n_groups, const bool is_final,
                             vector<int> &vec_firstobs, vector<int> &vec_table,
                             vector<double> &vec_sum,
@@ -682,11 +664,11 @@ void multiple_ints_to_index(const vector<std::shared_ptr<IndexInputVector>> &all
   int K = all_k.size();
     
   for(auto &&k : all_k){
-    sum_bin_ranges += all_pvecs[k]->x_range_bin;
+    sum_bin_ranges += all_vecs[k].x_range_bin;
   }  
   
   int k0 = all_k[0];
-  const IndexInputVector *x0 = all_pvecs[k0].get();
+  const IndexInputVector *x0 = &all_vecs[k0];
   const size_t n = x0->n;
   const int * px0_int = (int *) x0->px_int;
   const double * px0_dbl = (double *) x0->px_dbl;
@@ -750,7 +732,7 @@ void multiple_ints_to_index(const vector<std::shared_ptr<IndexInputVector>> &all
   } else {
     
     int k1 = all_k[1];
-    const IndexInputVector *x1 = all_pvecs[k1].get();
+    const IndexInputVector *x1 = &all_vecs[k1];
     const int *px1_int = (int *) x1->px_int;
     const double *px1_dbl = (double *) x1->px_dbl;
     
@@ -841,7 +823,7 @@ void multiple_ints_to_index(const vector<std::shared_ptr<IndexInputVector>> &all
       offset += x1->x_range_bin;
       for(int ind=2 ; ind<K-1 ; ++ind){
         int k = all_k[ind];
-        const IndexInputVector *xk = all_pvecs[k].get();
+        const IndexInputVector *xk = &all_vecs[k];
         const int *pxk_int = (int *) xk->px_int;
         const double *pxk_dbl = (double *) xk->px_dbl;
         
@@ -861,7 +843,7 @@ void multiple_ints_to_index(const vector<std::shared_ptr<IndexInputVector>> &all
             
       // last element + group creation
       int k = all_k[K - 1];
-      const IndexInputVector *xk = all_pvecs[k].get();
+      const IndexInputVector *xk = &all_vecs[k];
       const int *pxk_int = (int *) xk->px_int;
       const double *pxk_dbl = (double *) xk->px_dbl;
       
@@ -913,18 +895,18 @@ void multiple_ints_to_index(const vector<std::shared_ptr<IndexInputVector>> &all
   delete[] int_array;
 }
 
-std::vector<std::shared_ptr<IndexInputVector>> SEXP_to_vec_r_vector(const SEXP &x){
+std::vector<IndexInputVector> SEXP_to_vec_r_vector(const SEXP &x){
   
   size_t n = 0;
   int K = 0;
-  std::vector<std::shared_ptr<IndexInputVector>> all_pvecs;
+  std::vector<IndexInputVector> all_vecs;
   
   // we set up the info with the rvec class. It makes it easy to pass across functions
   if(TYPEOF(x) == VECSXP){
     K = Rf_length(x);
     for(int k=0; k<K; ++k){
-      std::shared_ptr<IndexInputVector> prvec = std::make_shared<IndexInputVector>(VECTOR_ELT(x, k));
-      all_pvecs.push_back(prvec);
+      IndexInputVector rvec{VECTOR_ELT(x, k)};
+      all_vecs.push_back(rvec);
       
       if(k == 0){
         n = Rf_length(VECTOR_ELT(x, 0));
@@ -934,19 +916,19 @@ std::vector<std::shared_ptr<IndexInputVector>> SEXP_to_vec_r_vector(const SEXP &
     }
     
   } else {
-    std::shared_ptr<IndexInputVector> prvec = std::make_shared<IndexInputVector>(x);
-    all_pvecs.push_back(prvec);
+    IndexInputVector rvec{x};
+    all_vecs.push_back(rvec);
   }
   
-  return all_pvecs;
+  return all_vecs;
 }
 
 void to_index_main(const SEXP &x, IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum){
   
-  std::vector<std::shared_ptr<IndexInputVector>> all_pvecs = SEXP_to_vec_r_vector(x);
+  std::vector<IndexInputVector> all_vecs = SEXP_to_vec_r_vector(x);
   
-  to_index_main(all_pvecs, output, do_sum, p_vec_to_sum);
+  to_index_main(all_vecs, output, do_sum, p_vec_to_sum);
 }
 
 void to_index_main(const SEXP &x, IndexedVector &output){
@@ -955,27 +937,26 @@ void to_index_main(const SEXP &x, IndexedVector &output){
   to_index_main(x, output, do_sum, p_vec_to_sum);
 }
 
-void to_index_main(const std::shared_ptr<IndexInputVector> &x, IndexedVector &output, 
+void to_index_main(const IndexInputVector &x, IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum){
-  std::vector<std::shared_ptr<IndexInputVector>> all_pvecs;
-  all_pvecs.push_back(x);
-  to_index_main(all_pvecs, output, do_sum, p_vec_to_sum);
+  std::vector<IndexInputVector> all_vecs;
+  all_vecs.push_back(x);
+  to_index_main(all_vecs, output, do_sum, p_vec_to_sum);
 }
 
-void to_index_main(const std::shared_ptr<IndexInputVector> &x, IndexedVector &output){
+void to_index_main(const IndexInputVector &x, IndexedVector &output){
   const bool do_sum = false;
   const double *p_vec_to_sum = nullptr;
   to_index_main(x, output, do_sum, p_vec_to_sum);
 }
 
-void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &x, IndexedVector &output){
+void to_index_main(const std::vector<IndexInputVector> &x, IndexedVector &output){
   const bool do_sum = false;
   const double *p_vec_to_sum = nullptr;
   to_index_main(x, output, do_sum, p_vec_to_sum);
 }
 
-void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pvecs, 
-                   IndexedVector &output, 
+void to_index_main(const std::vector<IndexInputVector> &all_vecs, IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum){
   
   // x: vector or list of vectors of the same length (n)
@@ -983,8 +964,8 @@ void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pve
   // - index: vector of length n, from 1 to the numberof unique values of x (g)
   // - first_obs: vector of length g of the first observation belonging to each group
   
-  int K = all_pvecs.size();
-  int n = all_pvecs.at(0)->size();
+  int K = all_vecs.size();
+  int n = all_vecs.at(0).size();
   
   if(n != output.size()){
     Rcpp::stop("Internal error `to_index_main`: The index size allocated in output is different from the input!");
@@ -1005,7 +986,7 @@ void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pve
   int sum_bin_ranges = 0;
   vector<int> id_fast_int;
   for(int k=0 ; k<K ; ++k){
-    const IndexInputVector *x = all_pvecs[k].get();
+    const IndexInputVector *x = &all_vecs[k];
     if(x->is_fast_int){
       int new_bin_range = sum_bin_ranges + x->x_range_bin;
       if(new_bin_range < 17 || (K >= 2 && new_bin_range <= power_of_two(5 * n))){
@@ -1029,7 +1010,7 @@ void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pve
     init_done = true;
     
     is_final = (size_t) K == id_fast_int.size();
-    multiple_ints_to_index(all_pvecs, id_fast_int, p_index, n_groups, is_final, 
+    multiple_ints_to_index(all_vecs, id_fast_int, p_index, n_groups, is_final, 
                            vec_firstobs, vec_table, vec_sum, do_sum, p_vec_to_sum);
   }
   
@@ -1057,7 +1038,7 @@ void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pve
       all_k_left.erase(all_k_left.begin());
       
       is_final = all_k_left.empty();
-      general_type_to_index_single(all_pvecs[k0].get(), p_index, n_groups, is_final, 
+      general_type_to_index_single(&all_vecs[k0], p_index, n_groups, is_final, 
                                    vec_firstobs, vec_table, vec_sum, do_sum, p_vec_to_sum);
     }
     
@@ -1072,12 +1053,12 @@ void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pve
         int k = all_k_left[ind];
         is_final = ind == all_k_left.size() - 1;
         if(is_res_updated_index){
-          general_type_to_index_double(all_pvecs[k].get(), p_index, p_extra_index, n_groups, 
+          general_type_to_index_double(&all_vecs[k], p_index, p_extra_index, n_groups, 
                                        is_final, vec_firstobs, vec_table, vec_sum, 
                                        do_sum, p_vec_to_sum);
           is_res_updated_index = false;
         } else {
-          general_type_to_index_double(all_pvecs[k].get(), p_extra_index, p_index, n_groups, 
+          general_type_to_index_double(&all_vecs[k], p_extra_index, p_index, n_groups, 
                                        is_final, vec_firstobs, vec_table, vec_sum, 
                                        do_sum, p_vec_to_sum);
           is_res_updated_index = true;
@@ -1099,9 +1080,9 @@ void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &all_pve
 SEXP cpp_to_index(SEXP &x){
   
   // x can be a vector or a list of vectors of the same length
-  std::vector<std::shared_ptr<indexthis::IndexInputVector>> all_pvecs = indexthis::SEXP_to_vec_r_vector(x);
+  std::vector<indexthis::IndexInputVector> all_vecs = indexthis::SEXP_to_vec_r_vector(x);
   
-  const int n = all_pvecs.at(0)->size();
+  const int n = all_vecs.at(0).size();
   SEXP index = PROTECT(Rf_allocVector(INTSXP, n));
   
   indexthis::IndexedVector index_info(index);
@@ -1110,7 +1091,7 @@ SEXP cpp_to_index(SEXP &x){
   // computing the index 
   //
   
-  to_index_main(all_pvecs, index_info);
+  to_index_main(all_vecs, index_info);
   
   //
   // saving the results 

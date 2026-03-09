@@ -1,5 +1,4 @@
 
-#include <memory>
 #include <stdint.h>
 #include <cmath>
 #include <vector>
@@ -56,22 +55,16 @@ inline SEXP to_r_vector(const vector<int> &x){
 // Class very useful to pass around the data on R vectors 
 class IndexInputVector {
   
-  SEXP x_conv;
   bool is_initialized = false;
   
   void reset(){
     // we reset to the default values
-    
-    if(is_protect){
-      UNPROTECT(1);
-    }
     
     is_fast_int = false;
     x_range = 0;
     x_range_bin = 0;
     x_min = 0;
     type = 0;
-    is_protect = false;
     any_na = true;
     NA_value = -1;
     px_int = nullptr;
@@ -97,10 +90,6 @@ public:
   int x_min = 0;
   int type = 0;
   
-  // if a non numeric non character vector has been turned into character
-  // we need to keep track of protection
-  bool is_protect = false;
-  
   // this is only used in the quick ints algorithm
   // for factors and bool we assume there are NAs since we don't traverse the data
   //  to find the range, contrary to ints or dbl_ints
@@ -111,12 +100,6 @@ public:
   const int *px_int = (int *) nullptr;
   const double *px_dbl = (double *) nullptr;
   const intptr_t *px_intptr = (intptr_t *) nullptr;
-  
-  ~IndexInputVector(){
-    if(is_protect){
-      UNPROTECT(1);
-    }
-  }
   
 };
 
@@ -233,16 +216,14 @@ void to_index_main(const SEXP &x, IndexedVector &output);
 void to_index_main(const SEXP &x, IndexedVector &output,
                    const bool do_sum, const double *p_vec_to_sum);
 
-void to_index_main(const std::shared_ptr<IndexInputVector> &x, IndexedVector &output);
+void to_index_main(const IndexInputVector &x, IndexedVector &output);
 
-void to_index_main(const std::shared_ptr<IndexInputVector> &x, IndexedVector &output, 
+void to_index_main(const IndexInputVector &x, IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum);
 
-void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &x, 
-                   IndexedVector &output);
+void to_index_main(const std::vector<IndexInputVector> &x, IndexedVector &output);
 
-void to_index_main(const std::vector<std::shared_ptr<IndexInputVector>> &x, 
-                   IndexedVector &output, 
+void to_index_main(const std::vector<IndexInputVector> &x, IndexedVector &output, 
                    const bool do_sum, const double *p_vec_to_sum);
 
 } // namespace indexthis
