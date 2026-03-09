@@ -390,7 +390,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
           .message = paste0("If argument 'vcov' is to be a function, it should return a square numeric matrix of the same dimension as the number of coefficients (here ", n_coef, ")."))
 
     # We add the type of the matrix
-    attr(vcov, "type") = vcov_name
+    attr(vcov, "vcov_type") = vcov_name
     attr(vcov, "df.K") = object$nparams
 
     return(vcov)
@@ -406,7 +406,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     n_coef = length(object$coefficients)
     check_value(vcov, "square matrix nrow(value)", .value = n_coef)
 
-    attr(vcov, "type") = if(is.null(user_vcov_name)) "Custom" else user_vcov_name
+    attr(vcov, "vcov_type") = if(is.null(user_vcov_name)) "Custom" else user_vcov_name
 
     attr(vcov, "df.K") = object$nparams
 
@@ -808,7 +808,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
 
     if(IS_NA_VCOV){
-      attr(bread, "type") = "NA (not-available)"
+      attr(bread, "vcov_type") = "NA (not-available)"
 
       if(is_attr){
         attr(bread, "df.K") = object$nparams
@@ -928,9 +928,9 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
       attr(vcov_mat, "df.t") = max(n - K, 1)
     }
 
-    if(is.null(attr(vcov_mat, "type", exact = TRUE))){
+    if(is.null(attr(vcov_mat, "vcov_type", exact = TRUE))){
       type_info = attr(vcov_mat, "type_info")
-      attr(vcov_mat, "type") = paste0(vcov_select$vcov_label, type_info)
+      attr(vcov_mat, "vcov_type") = paste0(vcov_select$vcov_label, type_info)
       attr(vcov_mat, "type_info") = NULL
     }
     
@@ -943,6 +943,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
       attr(vcov_mat, v) = NULL
     }
   }
+  
+  class(vcov_mat) = "fixest_vcov"
 
   vcov_mat
 }
@@ -2042,7 +2044,7 @@ vcov_cluster_internal = function(bread, scores, vars, ssc, object, n, K,
   if(length(var_names_all) > 0){
     attr(vcov_mat, "type_info") = sma(" ({' & 'c ? var_names_all})")
   } else {
-    attr(vcov_mat, "type") = switch(nway,
+    attr(vcov_mat, "vcov_type") = switch(nway,
                                     "1" = "Clustered",
                                     "2" = "Two-way",
                                     "3" = "Three-way",

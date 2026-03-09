@@ -679,8 +679,8 @@ base_panel = unpanel(pdat)
 est_pdat = feols(y ~ x1 | fe, pdat)
 est_panel = feols(y ~ x1 | fe, base_panel, panel.id = ~id+period)
 
-test(attr(vcov(est_pdat, attr = TRUE), "type"),
-     attr(vcov(est_panel, attr = TRUE), "type"))
+test(attr(vcov(est_pdat, attr = TRUE), "vcov_type"),
+     attr(vcov(est_panel, attr = TRUE), "vcov_type"))
 
 #
 # testing irregularities
@@ -1154,7 +1154,7 @@ chunk("custom vcov")
 est <- feols(mpg ~ i(cyl), mtcars)
 vcov_HC3 <- sandwich::vcovHC(est, type = "HC3")
 est_HC3 <- summary(est, vcov = list("HC3" = vcov_HC3))
-test(attr(est_HC3$se, "type"), "HC3")
+test(attr(est_HC3$se, "vcov_type"), "HC3")
 est_tab <- etable(est_HC3)
 test(any(grepl("HC3", est_tab[[2]])), TRUE)
 
@@ -1182,8 +1182,8 @@ est_multi_HC3 <- summary(est_multi, vcov = vcovs_HC3)
 test(vcov(est_multi_HC3[[1]]), vcovs_HC3[[1]])
 test(vcov(est_multi_HC3[[2]]), vcovs_HC3[[2]])
 
-test(attr(est_multi_HC3[[1]]$se, "type"), "HC3")
-test(attr(est_multi_HC3[[2]]$se, "type"), "HC3")
+test(attr(est_multi_HC3[[1]]$se, "vcov_type"), "HC3")
+test(attr(est_multi_HC3[[2]]$se, "vcov_type"), "HC3")
 
 est_tab <- etable(est_multi, est_multi_HC3)
 test(any(grepl("HC3", est_tab$est_multi_HC3.1)), TRUE)

@@ -186,7 +186,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
   coeftable = x$coeftable
 
   # The type of SE
-  se.type = attr(coeftable, "type")
+  se.type = attr(coeftable, "vcov_type")
   if(is.null(se.type)) se.type = "Custom"
 
   if(x$method_type == "feNmlm"){
@@ -758,7 +758,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
     colnames(coeftable) = colnames(object$coeftable)
   }
 
-  attr(coeftable, "type") = attr(se, "type") = attr(vcov, "type")
+  attr(coeftable, "vcov_type") = attr(se, "vcov_type") = attr(vcov, "vcov_type")
 
   object$cov.scaled = vcov
   object$coeftable = coeftable
@@ -3149,7 +3149,7 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
     names(res) = bound_names
   }
 
-  attr(res, "type") = attr(se_all, "type")
+  attr(res, "vcov_type") = attr(se_all, "vcov_type")
 
   res
 }

@@ -2555,7 +2555,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     if(isTRUE(x$onlyFixef)){
       se_type_list[[m]] = "NONE_FIXEF_ONLY"
     } else {
-      se_type_list[[m]] = attr(x$se, "type")
+      se_type_list[[m]] = attr(x$se, "vcov_type")
     }
 
     # family

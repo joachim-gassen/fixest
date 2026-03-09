@@ -2113,7 +2113,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
     names(coeftable) = c("Estimate", "Std. Error", "t value",  "Pr(>|t|)")
     row.names(coeftable) = names(coef)
 
-    attr(se, "type") = attr(coeftable, "type") = "IID"
+    attr(se, "vcov_type") = attr(coeftable, "vcov_type") = "IID"
     res$coeftable = coeftable
     res$se = se
   }
@@ -3325,7 +3325,7 @@ feglm.fit = function(y, X, fixef_df, family = "gaussian", vcov, offset, split,
     names(coeftable) = ctable_names
     row.names(coeftable) = names(coef)
 
-    attr(se, "type") = attr(coeftable, "type") = "IID"
+    attr(se, "vcov_type") = attr(coeftable, "vcov_type") = "IID"
     res$coeftable = coeftable
     res$se = se
   }
@@ -4475,7 +4475,7 @@ feNmlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian"
   names(coeftable) = c("Estimate", "Std. Error", "z value",  "Pr(>|z|)")
   row.names(coeftable) = params
 
-  attr(se, "type") = attr(coeftable, "type") = "IID"
+  attr(se, "vcov_type") = attr(coeftable, "vcov_type") = "IID"
 
   mu_both = get_mu(coef, env, final = TRUE)
   mu = mu_both$mu

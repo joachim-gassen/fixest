@@ -921,7 +921,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
           # The VCOV is always full rank in here
           stat = .wald(x, names(my_coef))
           p = pf(stat, df1, df2, lower.tail = FALSE)
-          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                     vcov = attr(x$cov.scaled, "vcov_type"))
           res_all[[type]] = set_value(vec, value)
 
         } else {
@@ -940,7 +941,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
             stat = .wald(x, x$iv_inst_names_xpd)
 
             p = pf(stat, df1, df2, lower.tail = FALSE)
-            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                       vcov = attr(x$cov.scaled, "vcov_type"))
             res_all[[type]] = set_value(vec, value)
 
           } else {
@@ -952,7 +954,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
             stat = .wald(x, x$iv_endo_names_fit)
 
             p = pf(stat, df1, df2, lower.tail = FALSE)
-            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                       vcov = attr(x$cov.scaled, "vcov_type"))
             res_all[[type]] = set_value(vec, value)
           }
 
@@ -972,7 +975,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
             stat = .wald(x, x$iv_inst_names_xpd)
 
             p = pf(stat, df1, df2, lower.tail = FALSE)
-            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+            vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                       vcov = attr(x$cov.scaled, "vcov_type"))
             res_all[[type]] = set_value(vec, value)
 
           } else {
@@ -999,7 +1003,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
               p = pf(stat, df1, df2, lower.tail = FALSE)
               vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
-                         vcov = attr(x$cov.scaled, "type"))
+                         vcov = attr(x$cov.scaled, "vcov_type"))
               res_all[[paste0(type, "::", endo)]] = set_value(vec, value)
             }
           }
@@ -1018,7 +1022,8 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
           stat = .wald(x, x$iv_endo_names_fit)
 
           p = pf(stat, df1, df2, lower.tail = FALSE)
-          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = attr(x$cov.scaled, "type"))
+          vec = list(stat = stat, p = p, df1 = df1, df2 = df2, 
+                     vcov = attr(x$cov.scaled, "vcov_type"))
           res_all[[type]] = set_value(vec, value)
 
         } else {
@@ -1208,7 +1213,7 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
   # The VCOV is always full rank in here
   stat = drop(my_coef %*% invert_posdef_mat(x$cov.scaled[qui, qui]) %*% my_coef) / df1
   p = pf(stat, df1, df2, lower.tail = FALSE)
-  vcov = attr(x$cov.scaled, "type")
+  vcov = attr(x$cov.scaled, "vcov_type")
   vec = list(stat = stat, p = p, df1 = df1, df2 = df2, vcov = vcov)
 
   if(print){
@@ -1631,7 +1636,7 @@ kp_stat = function(x){
 
   n_endo = length(x$iv_first_stage)
   n_inst = x$iv_n_inst
-  VCOV_TYPE = attr(x$cov.scaled, "type")
+  VCOV_TYPE = attr(x$cov.scaled, "vcov_type")
   if (!identical(VCOV_TYPE, "IID") && n_inst != n_endo) {
     warning(paste0(
       "KP calculation is only implemented for the cases:\n",

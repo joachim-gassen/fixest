@@ -4654,7 +4654,7 @@ fixest_NA_results = function(env, cause = NULL){
 
   cov.scaled = matrix(NA, n, n)
 
-  attr(se, "type") = attr(coeftable, "type") = attr(cov.scaled, "type") = "Void"
+  attr(se, "vcov_type") = attr(coeftable, "vcov_type") = attr(cov.scaled, "vcov_type") = "Void"
   res$coeftable = coeftable
   res$se = se
   res$cov.scaled = cov.scaled
@@ -4724,7 +4724,7 @@ fixest_NA_results_IV = function(env_2nd_stage, res_first_stage, cause = NULL){
 
   cov.scaled = matrix(NA, n, n)
 
-  attr(se, "type") = attr(coeftable, "type") = attr(cov.scaled, "type") = "Void"
+  attr(se, "vcov_type") = attr(coeftable, "vcov_type") = attr(cov.scaled, "vcov_type") = "Void"
   res$coeftable = coeftable
   res$se = se
   res$cov.scaled = cov.scaled
