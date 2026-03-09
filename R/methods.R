@@ -1681,7 +1681,10 @@ se.matrix = function(object, keep, drop, order, ...){
   se
 }
 
-
+#' @describeIn coeftable.default Extracts the standard-errors from a `fixest` VCOV matrix
+se.fixest_vcov = function(object, keep, drop, order, ...){
+  se.matrix(object = object, keep = keep, drop = drop, order = order)
+}
 
 #' Obtain various statistics from an estimation
 #'
