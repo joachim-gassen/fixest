@@ -4063,6 +4063,12 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
       } else {
         K = K + sum(fixef_sizes - 1) + 1
       }
+      
+      # NOTA: the intercept may sneak in in multiple estimations, we need to bookkeep
+      if("(Intercept)" %in% params){
+        K = K - 1
+      }
+      
     }
     res$nparams = K
 
@@ -4154,6 +4160,12 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
       } else {
         K = K + sum(fixef_sizes - 1) + 1
       }
+      
+      # NOTA: the intercept may sneak in in multiple estimations, we need to bookkeep
+      if("(Intercept)" %in% params){
+        K = K - 1
+      }
+      
     }
     res$nparams = K
 

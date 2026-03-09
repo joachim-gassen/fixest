@@ -15,7 +15,9 @@
 
 - fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the intruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by @willwwang, #604
 
-- remove unwanted warnings when using VCOV HC2/HC3.
+- remove unwanted warnings when using VCOV HC2/HC3
+
+- fix bug leading to an increase of 1 in the degrees of freedom in estimations involving multiple fixed-effects. Thanks to @leostimpfle for reporting (#631).
 
 ## New features
 

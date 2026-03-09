@@ -1018,6 +1018,27 @@ test(length(est_lhs), 2)
 est_lhs = feols(..("mpg|wt") ~ disp | hp ~ qsec, data = mtcars)
 test(length(est_lhs), 2)
 
+# the right dof with SW FEs
+set.seed(42)
+df = data.frame(Y = rnorm(100), X1 = rnorm(100),
+                f1 = sample(1:5, 100, replace = TRUE), 
+                f2 = sample(1:4, 100, replace = TRUE))
+single_f1    = feols(Y ~ X1 | f1, data = d)
+single_f1_f2 = feols(Y ~ X1 | f1 + f2, data = d)
+multi_csw    = feols(Y ~ X1 | csw(f1, f2), data = d)
+multi_sw     = feols(Y ~ X1 | sw(f1, f1 + f2), data = d)
+
+test(single_f1$nparams, multi_csw[[1]]$nparams)
+test(single_f1$nparams, multi_sw[[1]]$nparams)
+
+test(single_f1_f2$nparams, multi_sw[[2]]$nparams)
+test(single_f1_f2$nparams, multi_sw[[2]]$nparams)
+
+# right dof when LHS is removed from RHS
+est = feols(c(Ozone, Temp) ~ Ozone + Wind, airquality)
+test(est[[1]]$nparams, 2)
+test(est[[2]]$nparams, 3)
+
 
 
 ####
@@ -1267,6 +1288,7 @@ test(feols(y ~ sw(x1, x2), base, only.coef = TRUE), "err")
 ####
 #### Standard-errors ####
 ####
+
 
 chunk("STANDARD ERRORS")
 
