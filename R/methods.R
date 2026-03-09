@@ -974,6 +974,55 @@ summary.fixest.fixef = function(object, n = 5, ...){
 
 }
 
+
+####
+#### vcov ####
+####
+
+
+#' A print facility for the VCOVs from `fixest` objects.
+#' 
+#' Prints a VCOV obtained from `fixest`, on top of a regular matrix display, its main use is to: 
+#' i) report how the VCOV was computed, and ii) hide the information on attributes
+#' 
+#' 
+#' @param x A `fixest_vcov` object, obtained from [`vcov.fixest`].
+#' @param ... Not used.
+#' 
+#' @return 
+#' This function does not return anything.
+#' 
+#' @author 
+#' Laurent Berge
+#' 
+#' @examples 
+#' 
+#' # 1) fixest estimation
+#' est = feols(Petal.Length ~ Sepal.Width, iris)
+#' 
+#' # 2) print the VCOV; this method hides the attributes
+#' vcov(est)
+#' 
+#' # 3) showing the attributes if needed
+#' attributes(vcov(est))
+#' 
+#' 
+print.fixest_vcov = function(x, ...){
+  
+  if(!is.null(attr(x, "vcov_type"))){
+    cat("VCOV type: ", attr(x, "vcov_type"), "\n")
+  }
+  
+  x_clean = x
+  attributes(x_clean) = NULL
+  attr(x_clean, "dim") = dim(x)
+  dimnames(x_clean) = dimnames(x)
+  
+  print(x_clean)
+  
+}
+
+
 ####
 #### fixef ####
 ####

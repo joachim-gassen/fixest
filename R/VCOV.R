@@ -19,7 +19,7 @@
 #' @inheritParams summary.fixest
 #' @inheritParams nobs.fixest
 #'
-#' @param attr Logical, defaults to `FALSE`. Whether to include the attributes describing how 
+#' @param attr Logical, defaults to `TRUE`. Whether to include the attributes describing how 
 #' the VCOV was computed.
 #' @param ... Other arguments to be passed to [`summary.fixest`].
 #'
@@ -49,7 +49,8 @@
 #' 
 #' @references
 #'
-#' Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." Statistics & Probability Letters 168. 
+#' Ding, Peng, 2021, "The Frisch–Waugh–Lovell theorem for standard errors." 
+#' Statistics & Probability Letters 168. 
 #'
 #' @examples
 #'
@@ -204,8 +205,8 @@
 #'
 #'
 #'
-vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = FALSE, 
-                       forceCovariance = FALSE, keepBounded = FALSE, 
+vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr = TRUE,
+                       forceCovariance = FALSE, keepBounded = FALSE,
                        nthreads = getFixest_nthreads(), vcov_fix = TRUE, ...){
   # computes the clustered vcov
 
@@ -1124,9 +1125,11 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
   res
 }
 
+
 ####
 #### User-level ####
 ####
+
 
 #' Heteroskedasticity-Robust VCOV
 #'

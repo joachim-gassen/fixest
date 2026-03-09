@@ -47,6 +47,10 @@
 
 - remove calls to Rf_error (reported by @Enchufa2, #636)
 
+- new method `print.fixest_vcov` to display the VCOV without showing its attributes (too many, it was ugly)
+
+- in `vcov.fixest`, the argument `attr` is now equal to `TRUE` by default (following `print.fixest_vcov`)
+
 # fixest 0.13.2
 
 ## Bug fixes
