@@ -1371,7 +1371,11 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
             return(fixest_NA_results_IV(env, res_first_stage, msg))
             
           } else {
-            stopi("{msg}")
+            mema("[IV error] Problematic 1st stage results:")
+            my_res$iv = FALSE
+            print(my_res)
+            
+            stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
           }
           
         }
@@ -1531,7 +1535,12 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
             return(fixest_NA_results_IV(env, res_first_stage, msg))
             
           } else {
-            stopi("{msg}")
+            
+            mema("[IV error] Problematic 1st stage results:")
+            my_res$iv = FALSE
+            print(my_res)
+            
+            stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
           }
           
         }
