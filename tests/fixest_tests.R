@@ -1039,7 +1039,24 @@ est = feols(c(Ozone, Temp) ~ Ozone + Wind, airquality)
 test(est[[1]]$nparams, 2)
 test(est[[2]]$nparams, 3)
 
+# Ensure the FEs names are handled correctly in split estimations
+# NOTA: in split estimations, the FEs are refactors wrt the initial full sample FE
+#       => this is a specific branch
+set.seed(0)
+N = 200; G = 10
+dt = data.frame(id = sample(1:50, N, TRUE), firm = sample(1:G, N, TRUE),
+                year = sample(1:5, N, TRUE), female = sample(0:1, N, TRUE),
+                x = rnorm(N), y = rnorm(N))
 
+est_split = feols(y ~ x | id + firm + year, dt, fsplit = ~ female)
+# predict for female
+p_split = predict(est_split[[3]], newdata = dt)
+
+# without split sample
+est_subset = feols(y ~ x | id + firm + year, dt, subset = ~ female == 1)
+p_subset = predict(est_subset, newdata = dt)
+
+test(p_split, p_subset)
 
 ####
 #### ... IV ####

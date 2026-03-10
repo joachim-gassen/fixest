@@ -2732,7 +2732,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
 
   # init fixed-effect values
   value_fixef = 0
-
+  
   fixef_vars = object$fixef_vars
   if(!is.null(fixef_vars)){
 

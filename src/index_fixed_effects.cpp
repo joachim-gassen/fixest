@@ -139,7 +139,7 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
     all_indexes_sexp[q] = PROTECT(Rf_allocVector(INTSXP, n_obs));
   }
   
-  std::vector< indexthis::IndexInputVector > all_input_vectors(Q);
+  std::vector<indexthis::IndexInputVector> all_input_vectors(Q);
   std::vector<indexthis::IndexedVector> all_index_info(Q);
   for(int q = 0 ; q < Q ; ++q){
     const SEXP &fixef_vec = VECTOR_ELT(fixef_list, q);
@@ -174,10 +174,10 @@ SEXP cpp_index_table_sum(SEXP fixef_list, SEXP y, const bool save_sum_y,
     #pragma omp parallel for num_threads(nthreads)
     for(int q = 0 ; q < Q ; ++q){
       
-      const indexthis::IndexInputVector &pfixef_vec = all_input_vectors[q];
+      const indexthis::IndexInputVector &fixef_vec = all_input_vectors[q];
       indexthis::IndexedVector &index_info = all_index_info[q];
       
-      indexthis::to_index_main(pfixef_vec, index_info, do_sum_y, p_y);
+      indexthis::to_index_main(fixef_vec, index_info, do_sum_y, p_y);
       
       if(do_removal[q]){
         mark_obs_to_remove(removed_flag, any_removed, all_firstobs_rm_new[q],

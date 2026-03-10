@@ -3464,7 +3464,8 @@ setup_fixef = function(fixef_df, lhs, fixef_vars, fixef.rm, family, lhs_bounds,
       # index(fe_index) B   
       #            (new/old):              1, 2, 3, 2
       
-      items = all_index_info$index[[i]][all_index_info$firstobs[[i]]]
+      # NOTA: $firstobs gives the index of the input object
+      items = fixef_df[[i]][all_index_info$firstobs[[i]]]
       items_order = order(items)
       items_order_order = order(items_order)
       

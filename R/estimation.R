@@ -2228,7 +2228,8 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
   res
 }
 
-check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, full = FALSE, fixef_names = NULL){
+check_conv = function(y, X, fixef_id_list, slope_flag, slope_vars, weights, 
+                      full = FALSE, fixef_names = NULL){
   # VERY SLOW!!!!
   # IF THIS FUNCTION LASTS => TO BE PORTED TO C++
 

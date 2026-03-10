@@ -19,6 +19,8 @@
 
 - fix bug leading to an increase of 1 in the degrees of freedom in estimations involving multiple fixed-effects. Thanks to @leostimpfle for reporting (#631).
 
+- fix bug in the predict method when applied to split sample estimations with fixed-effects with some fixed-effects which were removed. Thanks to @francescodelprato for reporting (#620).
+
 ## New features
 
 - THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (https://arxiv.org/abs/2601.21749).
