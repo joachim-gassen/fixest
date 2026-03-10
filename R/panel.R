@@ -390,7 +390,7 @@ l = function(x, k = 1, fill = NA){
 
       meta_info = attr(data_fixest_panel, "panel_info")
     } else {
-      stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag.formula().")
+      stop("Function l() (or f()) is only callable within 'fixest' estimations or within a variable creation with data.table (i.e. using ':=') where the data set is a 'fixest_panel' (obtained from panel()). Alternatively, you can use lag_fml().")
     }
   }
 
@@ -944,6 +944,11 @@ unpanel = function(x){
 #'
 `[.fixest_panel` = function(x, i, j, ...){
   # we need to perform proper bookkeeping
+  
+  if(is_calling_fun("print.data.table", full_search = TRUE)){
+    res = "[.data.frame"(x, i, j, drop = FALSE)
+    return(res)
+  }
 
   info = attr(x, "panel_info")
   mc = match.call()

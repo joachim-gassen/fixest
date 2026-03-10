@@ -6939,12 +6939,14 @@ is_calling_fun = function(pattern, full_search = FALSE, full_name = FALSE){
   if(n_sc > 2){
 
     if(full_search){
+      # we remove the last call (the one calling `is_calling_fun()`)
+      sc_all = sc_all[-n_sc]
       fun_all = sapply(tail(sc_all, 13), function(x) deparse(x)[1])
 
       if(full_name){
         pattern = sma("^{pattern}\\(")
       }
-
+      
       res = any(grepl(pattern, fun_all))
     } else {
       if(grepl(".fixest", sc_all[[n_sc - 1]][[1]], fixed = TRUE)){

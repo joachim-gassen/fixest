@@ -23,6 +23,8 @@
 
 - etable: fix bug removing whitespaces in variable names (reported by @etiennebacher, #608)
 
+- interaction between `panel()` and `data.table`: fix bug preventing the print of the table. Reported by @andrewbaxter439, #610.
+
 ## New features
 
 - THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (https://arxiv.org/abs/2601.21749).
