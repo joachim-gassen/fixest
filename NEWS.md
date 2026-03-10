@@ -59,6 +59,8 @@
 
 - in `vcov.fixest`, the argument `attr` is now equal to `TRUE` by default (following `print.fixest_vcov`)
 
+- in `update.fixest`, the argument use_calling_env becomes context dependent (follows #618)
+
 # fixest 0.13.2
 
 ## Bug fixes

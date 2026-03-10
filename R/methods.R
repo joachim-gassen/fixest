@@ -3233,11 +3233,14 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 #' `use_calling_env` is `FALSE`. 
 #' Number of frames up the stack where to perform the evaluation of the updated call. 
 #' By default, this is the parent frame.
-#' @param use_calling_env Logical scalar, default is `TRUE`. If `TRUE` then the evaluation 
-#' of the call will be done within the environment that called the initial estimation.
+#' @param use_calling_env Logical scalar, default is `NULL` (which means context-dependent).
+#' If `TRUE` then the evaluation of the call will be done within the environment 
+#' that called the initial estimation. If `FALSE`, it will use the current environment.
+#' By default, i.e. when `NULL`, it is equal to `FALSE` if the argument `data` is provided and 
+#' `TRUE` otherwise.
 #' This is mostly useful when the `fixest` object has been created through a custom 
 #' function, so that the new evaluation can use the variables within the enclosure of
-#' the function.
+#' that function.
 #' @param evaluate Logical, default is `TRUE`. If `FALSE`, only the updated call is returned.
 #' @param ... Other arguments to be passed to the functions [`femlm`], [`feols`] or [`feglm`].
 #'
@@ -3272,7 +3275,7 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
 #' etable(est_pois, est_2, est_3, est_4)
 #'
 update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1, 
-                         use_calling_env = TRUE, evaluate = TRUE, ...){
+                         use_calling_env = NULL, evaluate = TRUE, ...){
   # Update method
   # fml.update: update the formula
   # If 1) SAME DATA and 2) SAME dep.var, then we make initialisation
@@ -3280,7 +3283,8 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
 
   check_arg(fml.update, fml, "NULL ts formula")
 
-  check_arg(use_calling_env, evaluate, "logical scalar")
+  check_arg(evaluate, "logical scalar")
+  check_arg(use_calling_env, "NULL logical scalar")
 
   if(isTRUE(object$is_fit)){
     stop("update method not available for `fixest` estimations obtained from fit methods.")
@@ -3309,6 +3313,16 @@ update.fixest = function(object, fml.update = NULL, fml = NULL, nframes = 1,
     call_new_names = names(call_new)
     problems = call_new[call_new_names == ""][-1]
     stop("In 'update.fixest' the arguments of '...' are passed to the function ", object$method, ", and must be named. Currently there are un-named arguments (e.g. '", deparse_long(problems[[1]]), "').")
+  }
+  
+  # calling env
+  if(is.null(use_calling_env)){
+    use_calling_env = TRUE
+    if(!is.null(dots$data)){
+      # We use the calling environment by default, unless the argument data
+      # is given explicitly
+      use_calling_env = FALSE
+    }
   }
   
   # Family information
