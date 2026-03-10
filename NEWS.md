@@ -21,6 +21,8 @@
 
 - fix bug in the predict method when applied to split sample estimations with fixed-effects with some fixed-effects which were removed. Thanks to @francescodelprato for reporting (#620).
 
+- etable: fix bug removing whitespaces in variable names (reported by @etiennebacher, #608)
+
 ## New features
 
 - THIS SOFTWARE FINALLY GETS A PROPER CITATION!!! Citation file updated, now points to the 2026 arxiv paper (https://arxiv.org/abs/2601.21749).
@@ -39,7 +41,7 @@
 
 - the `stats` method `logLik.fixest` now resembles `logLik.lm`
 
-- add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate
+- add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate -- thanks to a referee and to GMD for the idea!
 
 - improve the display of the error messages in the main estimations
 

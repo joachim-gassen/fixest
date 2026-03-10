@@ -650,7 +650,7 @@
 #' # keep/drop: keeping only interactions
 #' etable(est1, est2, keep = " x ")
 #' # or using drop  (see regexp help):
-#' etable(est1, est2, drop = "^(Month|Temp|\\()")
+#' etable(est1, est2, drop = "^(Month|Temp|Cons)")
 #'
 #' # keep/drop: dropping interactions
 #' etable(est1, est2, drop = " x ")
@@ -658,7 +658,7 @@
 #' etable(est1, est2, keep = "! x ")
 #'
 #' # order: Wind variable first, intercept last (note the "!" to reverse the effect)
-#' etable(est1, est2, order = c("Wind", "!Inter"))
+#' etable(est1, est2, order = c("Wind", "!Const"))
 #' # Month, then interactions, then the rest
 #' etable(est1, est2, order = c("^Month", " x "))
 #'
@@ -2715,9 +2715,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     #
     # Now we rename the variables
     #
-
-    # on enleve les espaces dans les noms de variables
-    var = var_origin = c(gsub(" ", "", row.names(a)))
+    
+    var = var_origin = row.names(a)
     # renaming
     if(TRUE){
       # Now I clean white spaces in dict_apply
@@ -3260,7 +3259,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
 etable_internal_latex = function(info){
   # Internal function to display the latex table
-
+  
   n_models = length(info$depvar_list)
   # Getting the information
   se_type_list = info$se_type_list
