@@ -162,7 +162,7 @@ importFrom(sandwich, estfun, bread, bwNeweyWest)
 export(estfun, bread)
 
 importFrom(stringmagic, string_magic_alias, cat_magic_alias, message_magic_alias,
-           string_any)
+           string_any, string_clean)
 
 importFrom(stats, cor, dnorm, lm, nlminb, optim,
 			     pnorm, qnorm, as.formula, var, sd, formula,

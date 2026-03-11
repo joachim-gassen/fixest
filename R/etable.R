@@ -133,6 +133,20 @@
 #' [`setFixest_dict`]. You can use `dict = FALSE` to disable it. By default `dict` modifies the 
 #' entries in the global dictionary, to disable this behavior, use "reset" as the first element 
 #' (ex: `dict=c("reset", mpg="Miles per gallon")`).
+#' @param coef.sub A character vector, default is `NULL`. Modifications to be applied to the 
+#' final coefficient names (after the dictionary is applied). It only affect the coefficients
+#' and not the fixed-effects (use `dict` for that).
+#' Each element of this vector 
+#' should be of the form "pat => new" or "pat". If "pat => new", this means that the 
+#' regular expression pattern "pat" will be replaced with "new". If "pat", this means that the 
+#' regex pattern "pat" will be removed. You can apply 
+#' [stringmagic flags](https://lrberge.github.io/stringmagic/articles/ref_regex_flags.html) at 
+#' the beginning of the patterns, e.g. "i/pat" ignores the case.
+#' 
+#' This internal function applying the changes is [`string_clean`][stringmagic::string_clean].
+#' Ex: say you have two coefficients named "genderF" and "oldTRUE". Then using 
+#' `coef.sub=c("gender => Gender = ", "TRUE")` renames the coefficients into 
+#' "Gender = F" and "old".
 #' @param file A character scalar. If provided, the Latex (or data frame) table will be saved in a 
 #' file whose path is `file`. If you provide this argument, then a Latex table will be exported, to 
 #' export a regular `data.frame`, use argument `tex = FALSE`.
@@ -686,7 +700,7 @@
 #'
 #' @examples
 #'
-#'
+#' # Two similar estimations: one with the other without fixed-effects
 #' est1 = feols(Ozone ~ i(Month) / Wind + Temp, data = airquality)
 #' est2 = feols(Ozone ~ i(Month, Wind) + Temp | Month, data = airquality)
 #'
@@ -731,6 +745,14 @@
 #' 
 #' # Alternatively, we can use the special character '%' to make reference to the original names
 #' etable(est1, est2, dict = dict, keep = "%Month")
+#' 
+#' #
+#' # coef.sub
+#' #
+#' 
+#' # Let's use a regular expression to add parentheses around Month, in its product with Wind
+#' # [NOTA: this is a complex example just to illustrate how to use a regex with coef.sub]
+#' etable(est1, est2, coef.sub =  "x M(.+)$ => x (M\\1)")
 #'
 #' #
 #' # signif.code
@@ -984,7 +1006,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   se.row = NULL, se.below = NULL,
                   keep = NULL, drop = NULL, order = NULL,
                   keep_raw = NULL, drop_raw = NULL, order_raw = NULL,
-                  dict = TRUE, file = NULL, replace = TRUE, 
+                  dict = TRUE, coef.sub = NULL, file = NULL, replace = TRUE, 
                   create_dirs = FALSE, convergence = NULL,
                   signif.code = NULL, label = NULL, float = NULL,
                   headers = list("auto"), fixef_sizes = FALSE,
@@ -1252,7 +1274,8 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
       signif.code = signif.code, coefstat = coefstat,
       ci = ci, caption = caption, float = float, headers = headers,
       keepFactors = keepFactors, tex = TEX, useSummary = useSummary,
-      dots_call = dots_call, powerBelow = powerBelow, dict = dict,
+      dots_call = dots_call, powerBelow = powerBelow, 
+      dict = dict, coef.sub = coef.sub,
       interaction.combine = interaction.combine, interaction.order = interaction.order,
       i.equal = i.equal, convergence = convergence,
       family = family, 
@@ -1522,7 +1545,8 @@ gen_etable_aliases = function(){
 results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage = 2,
                                  agg = NULL, .vcov_args = NULL, digits = 4,
                                  digits.stats = 5, fitstat_all, se.row = NULL, 
-                                 se.below = NULL, dict,
+                                 se.below = NULL, 
+                                 dict, coef.sub,
                                  signif.code = c("***"=0.01, "**"=0.05, "*"=0.10),
                                  coefstat = "se", ci = 0.95, label, headers, caption,
                                  float = FALSE, replace = TRUE, keepFactors = FALSE,
@@ -1705,7 +1729,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     order = c(order, paste0("%", order_raw))
   }
   
-  
+  check_arg(coef.sub, "character vector no na NULL")
 
   check_arg(file, label, interaction.combine, i.equal, "NULL character scalar")
 
@@ -3313,7 +3337,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
              se.below = se.below,
              signif.code = signif.code, fixef_sizes = fixef_sizes, 
              fixef_sizes.simplify = fixef_sizes.simplify,
-             depvar = depvar, useSummary = useSummary, dict = dict, yesNo = yesNo, 
+             depvar = depvar, useSummary = useSummary, dict = dict, 
+             coef.sub = coef.sub, yesNo = yesNo, 
              add_signif = add_signif,
              float = float, coefstat = coefstat, ci = ci, style = style, 
              notes = notes, group = group,
@@ -3364,6 +3389,7 @@ etable_internal_latex = function(info){
   fixef_sizes = info$fixef_sizes
   fixef_sizes.simplify = info$fixef_sizes.simplify
   dict = info$dict
+  coef.sub = info$coef.sub
   yesNo = info$yesNo
   add_signif = info$add_signif
   float = info$float
@@ -3649,7 +3675,18 @@ etable_internal_latex = function(info){
 
     # we have coefficients to display
     # The names are set in results2formattedList
-    coef_names = escape_latex(all_vars)
+    coef_names = all_vars
+    if(length(coef.sub) > 0){
+      coef_names = try(string_clean(coef_names, coef.sub))
+      if(is_error(coef_names)){
+        err = as.character(coef_names)
+        stop_up("In `coef.sub` the expression led to the following error:\n{err}\n",
+                "Note that the format should be, e.g. coef.sub=c(\"pat1 => new1\", \"pat2\") ",
+                "where the pattern `pat1` is replaced with `new1` and `pat2` is simply removed. ",
+                "You can add flags, e.g. to ignore case \"i/pat\", see ?stringmagic::string_clean.")
+      }
+    }
+    coef_names = escape_latex(coef_names)
     names(coef_names) = all_vars
 
     if(se.below){
@@ -4288,6 +4325,7 @@ etable_internal_df = function(info){
   model_names = info$model_names
   coefstat = info$coefstat
   dict = info$dict
+  coef.sub = info$coef.sub
   group = info$group
   extralines = info$extralines
   style = info$style
@@ -4338,13 +4376,13 @@ etable_internal_df = function(info){
 
     if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
       if(!is.null(keep) && !any(grepl("^%", keep))){
-        msg = sma(" In particular, to 'keep' variables using their original names ", 
-                  "(before dict is applied), use the special character '%' first. ", 
-                  "E.g. keep = \"%", keep[1], "\"")
+        msg = paste0(" In particular, to 'keep' variables using their original names ", 
+                     "(before dict is applied), use use the argument `keep_raw`. ",
+                     "E.g. keep_raw = {Q ? keep[1]}")
       } else if(!is.null(drop) && !any(grepl("^%", drop))){
-        msg = sma(" In particular, to 'drop' variables using their original names ", 
-                  "(before dict is applied), use the special character '%' first. ", 
-                  "E.g. drop = \"%", drop[1], "\"")
+        msg = paste0(" In particular, to 'drop' variables using their original names ",
+                     "(before dict is applied), use the argument `drop_raw`. ", 
+                     "E.g. drop_raw = {Q ? drop[1]}")
       } else {
         msg = ""
       }
@@ -4361,6 +4399,20 @@ etable_internal_df = function(info){
     res = NULL
 
   } else {
+    
+    # coefficient names
+    coef_names = all_vars
+    if(length(coef.sub) > 0){
+      coef_names = try(string_clean(coef_names, coef.sub))
+      if(is_error(coef_names)){
+        err = as.character(coef_names)
+        stop_up("In `coef.sub` the expression led to the following error:\n{err}\n",
+                "Note that the format should be, e.g. coef.sub=c(\"pat1 => new1\", \"pat2\") ",
+                "where the pattern `pat1` is replaced with `new1` and `pat2` is simply removed. ",
+                "You can add flags, e.g. to ignore case \"i/pat\", see ?stringmagic::string_clean.")
+      }
+    }
+    
     se.below = info$se.below
     if(se.below){
       coef_below = info$coef_below
@@ -4381,11 +4433,11 @@ etable_internal_df = function(info){
 
       n_vars = length(all_vars)
       my_names = character(2 * n_vars)
-      my_names[1 + 2 * 0:(n_vars - 1)] = all_vars
+      my_names[1 + 2 * 0:(n_vars - 1)] = coef_names
 
       coef_mat = cbind(my_names, coef_se_mat)
     } else {
-      coef_mat = all_vars
+      coef_mat = coef_names
       for(m in 1:n_models) coef_mat = cbind(coef_mat, coef_list[[m]][all_vars])
       coef_mat[is.na(coef_mat)] = "  "
     }
@@ -4412,7 +4464,7 @@ etable_internal_df = function(info){
 
     res = coef_mat
   }
-
+  
   #
   # Group
   #

@@ -33,6 +33,8 @@
 
 - `etable`: new arguments `keep_raw`, `drop_raw`, `order_raw` which have the same effect as keep/drop/order but refer explicitly to the original variable names before the dictionary is applied
 
+- `etable`: new argument `coef.sub` to apply arbitrary string substitutions on the final coefficient names
+
 - in multiple estimations in which at least one estimation contains only missing values: no error is thrown any more
 
 - in `coefplot`: the argument `zero` now adds 0 to the y-axis (instead of only turning highlighting on/off)
