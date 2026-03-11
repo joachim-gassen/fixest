@@ -1023,10 +1023,10 @@ set.seed(42)
 df = data.frame(Y = rnorm(100), X1 = rnorm(100),
                 f1 = sample(1:5, 100, replace = TRUE), 
                 f2 = sample(1:4, 100, replace = TRUE))
-single_f1    = feols(Y ~ X1 | f1, data = d)
-single_f1_f2 = feols(Y ~ X1 | f1 + f2, data = d)
-multi_csw    = feols(Y ~ X1 | csw(f1, f2), data = d)
-multi_sw     = feols(Y ~ X1 | sw(f1, f1 + f2), data = d)
+single_f1    = feols(Y ~ X1 | f1, data = df)
+single_f1_f2 = feols(Y ~ X1 | f1 + f2, data = df)
+multi_csw    = feols(Y ~ X1 | csw(f1, f2), data = df)
+multi_sw     = feols(Y ~ X1 | sw(f1, f1 + f2), data = df)
 
 test(single_f1$nparams, multi_csw[[1]]$nparams)
 test(single_f1$nparams, multi_sw[[1]]$nparams)
