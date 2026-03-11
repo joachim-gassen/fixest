@@ -65,22 +65,63 @@
 #' @param keep Character vector. This element is used to display only a subset of variables. This 
 #' should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
 #' variable satisfying any of the regular expressions will be kept. This argument is applied post 
-#' aliasing (see argument `dict`). Example: you have the variable `x1` to `x55` and want to display 
+#' aliasing (see argument `dict`). 
+#' Use the argument `keep_raw` for the same effect before aliasing.
+#' 
+#' Example: you have the variable `x1` to `x55` and want to display 
 #' only `x1` to `x9`, then you could use `keep = "x[[:digit:]]$"`. If the first character is an 
-#' exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that 
-#' does not contain \dQuote{Intercept} is kept). See details.
+#' exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that 
+#' does not contain \dQuote{Constant} is kept). See details.
 #' @param drop Character vector. This element is used if some variables are not to be displayed. 
 #' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
 #' variable satisfying any of the regular expressions will be discarded. This argument is applied 
-#' post aliasing (see argument `dict`). Example: you have the variable `x1` to `x55` and want to 
+#' post aliasing (see argument `dict`). 
+#' Use the argument `drop_raw` for the same effect before aliasing.
+#' 
+#' Example: you have the variable `x1` to `x55` and want to 
 #' display only `x1` to `x9`, then you could use `drop = "x[[:digit:]]{2}`". If the first character 
-#' is an exclamation mark, the effect is reversed (e.g. drop = "!Intercept" means: every variable 
-#' that does not contain \dQuote{Intercept} is dropped). See details.
+#' is an exclamation mark, the effect is reversed (e.g. drop = "!Constant" means: every variable 
+#' that does not contain \dQuote{Constant} is dropped). See details.
 #' @param order Character vector. This element is used if the user wants the variables to be 
 #' ordered in a certain way. This should be a vector of regular expressions (see [`base::regex`] 
 #' help for more info). The variables satisfying the first regular expression will be placed first, 
 #' then the order follows the sequence of regular expressions. This argument is applied post 
-#' aliasing (see argument `dict`). Example: you have the following variables: `month1` to `month6`, 
+#' aliasing (see argument `dict`). Use the argument `order_raw` for the same effect before aliasing.
+#' 
+#' Example: you have the following variables: `month1` to `month6`, 
+#' then `x1` to `x5`, then `year1` to `year6`. If you want to display first the x's, then the 
+#' years, then the months you could use: `order = c("x", "year")`. If the first character is an 
+#' exclamation mark, the effect is reversed (e.g. order = "!Constant" means: every variable that 
+#' does not contain \dQuote{Constant} goes first).  See details.
+#' @param keep_raw Character vector. This element is used to display only a subset of variables.
+#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
+#' variable satisfying any of the regular expressions will be kept. This argument is applied before 
+#' aliasing (see argument `dict`). 
+#' Use the argument `keep` for the same effect after aliasing.
+#' 
+#' Example: you have the variable `x1` to `x55` and want to display 
+#' only `x1` to `x9`, then you could use `keep = "x[[:digit:]]$"`. If the first character is an 
+#' exclamation mark, the effect is reversed (e.g. keep_raw = "!Intercept" means: 
+#' every variable that does not contain \dQuote{Intercept} is kept). See details.
+#' @param drop_raw Character vector. This element is used if some variables are not to 
+#' be displayed. 
+#' This should be a vector of regular expressions (see [`base::regex`] help for more info). Each 
+#' variable satisfying any of the regular expressions will be discarded. This argument is applied 
+#' before aliasing (see argument `dict`). 
+#' Use the argument `drop` for the same effect after aliasing.
+#' 
+#' Example: you have the variable `x1` to `x55` and want to 
+#' display only `x1` to `x9`, then you could use `drop = "x[[:digit:]]{2}`". If the first character 
+#' is an exclamation mark, the effect is reversed (e.g. drop_raw = "!Intercept" means: 
+#' every variable that does not contain \dQuote{Intercept} is dropped). See details.
+#' @param order_raw Character vector. This element is used if the user wants the variables to be 
+#' ordered in a certain way. This should be a vector of regular expressions (see [`base::regex`] 
+#' help for more info). The variables satisfying the first regular expression will be placed first, 
+#' then the order follows the sequence of regular expressions. This argument is applied post 
+#' aliasing (see argument `dict`). 
+#' Use the argument `order` for the same effect after aliasing.
+#' 
+#' Example: you have the following variables: `month1` to `month6`, 
 #' then `x1` to `x5`, then `year1` to `year6`. If you want to display first the x's, then the 
 #' years, then the months you could use: `order = c("x", "year")`. If the first character is an 
 #' exclamation mark, the effect is reversed (e.g. order = "!Intercept" means: every variable that 
@@ -455,12 +496,17 @@
 #' of the regular expression (this feature is specific to this function). 
 #' For example `drop = "!Wind"` would drop any variable that does not contain "Wind".
 #'
-#' You can use the special character "%" (percentage) to make reference to the 
-#' original variable name instead of the aliased name. For example, you have a 
-#' variable named `"Month6"`, and use a dictionary `dict = c(Month6="June")`. 
+#' By default, the regular expressions are checked against the variables after
+#' they have been renamed with the dictionary (argument `dict`).
+#' You can use the `*_raw` versions of drop/keep/order to apply the regular
+#' expressions on the original variable names.
+#' Note that alternatively you can use the special character "%" (percentage) at the 
+#' beginning of drop/keep/order's regular expressions to refer to the original variable name. 
+#' For example, you have a variable named `"Month6"`, 
+#' and use a dictionary `dict = c(Month6="June")`. 
 #' Thus the variable will be displayed as `"June"`. 
-#' If you want to delete that variable, you can use either `drop="June"`, 
-#' or `drop="%Month6"` (which makes reference to its original name).
+#' If you want to delete that variable, you can use either `drop="June"`, `drop_raw="Month6"`,
+#' or `drop="%Month6"`.
 #'
 #' The argument `order` takes in a vector of regular expressions, the order will follow the 
 #' elements of this vector. The vector gives a list of priorities, 
@@ -679,8 +725,11 @@
 #'
 #' # We would like to keep only the Months, but now the names are all changed...
 #' # How to do?
-#' # We can use the special character '%' to make reference to the original names.
+#' # We can use the argument keep_raw to make reference to the original names.
 #'
+#' etable(est1, est2, dict = dict, keep_raw = "Month")
+#' 
+#' # Alternatively, we can use the special character '%' to make reference to the original names
 #' etable(est1, est2, dict = dict, keep = "%Month")
 #'
 #' #
@@ -934,6 +983,7 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
                   fitstat = NULL, caption = NULL, coefstat = "se", ci = 0.95,
                   se.row = NULL, se.below = NULL,
                   keep = NULL, drop = NULL, order = NULL,
+                  keep_raw = NULL, drop_raw = NULL, order_raw = NULL,
                   dict = TRUE, file = NULL, replace = TRUE, 
                   create_dirs = FALSE, convergence = NULL,
                   signif.code = NULL, label = NULL, float = NULL,
@@ -1205,7 +1255,10 @@ etable = function(..., vcov = NULL, stage = 2, agg = NULL,
       dots_call = dots_call, powerBelow = powerBelow, dict = dict,
       interaction.combine = interaction.combine, interaction.order = interaction.order,
       i.equal = i.equal, convergence = convergence,
-      family = family, keep = keep, drop = drop, file = file, order = order,
+      family = family, 
+      keep = keep, drop = drop, order = order,
+      keep_raw = keep_raw, drop_raw = drop_raw, order_raw = order_raw,
+      file = file, 
       label = label, fixef_sizes = fixef_sizes,
       fixef_sizes.simplify = fixef_sizes.simplify,
       depvar = depvar, style.tex = style.tex, style.df = style.df,
@@ -1475,8 +1528,9 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
                                  float = FALSE, replace = TRUE, keepFactors = FALSE,
                                  tex = FALSE, useSummary, dots_call, powerBelow = -5,
                                  interaction.combine, interaction.order, i.equal,
-                                 convergence, family, drop, order,
-                                 keep, file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
+                                 convergence, family, 
+                                 keep, drop, order, keep_raw, drop_raw, order_raw,
+                                 file, fixef_sizes = FALSE, fixef_sizes.simplify = TRUE,
                                  depvar = FALSE, style.tex = NULL, style.df=NULL,
                                  notes = NULL, group = NULL, extralines=NULL,
                                  fixef.group = NULL, placement = "htbp", drop.section = NULL,
@@ -1634,8 +1688,24 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
     show_depvar = depvar
   }
 
-  check_arg(keep, drop, order, "character vector no na NULL",
+  check_arg(keep, drop, order, keep_raw, drop_raw, order_raw, 
+            "character vector no na NULL",
             .message = "The arg. '__ARG__' must be a vector of regular expressions (see help(regex)).")
+  
+  # we assign *_raw to the regular ones using the % markup
+  if(length(keep_raw) > 0){
+    keep = c(keep, paste0("%", keep_raw))
+  }
+  
+  if(length(drop_raw) > 0){
+    drop = c(drop, paste0("%", drop_raw))
+  }
+  
+  if(length(order_raw) > 0){
+    order = c(order, paste0("%", order_raw))
+  }
+  
+  
 
   check_arg(file, label, interaction.combine, i.equal, "NULL character scalar")
 
@@ -3238,7 +3308,8 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
              family_list = family_list, fitstat_list = fitstat_list, headers = headers,
              isHeaders = isHeaders, caption = caption, convergence = convergence, 
              family = family,
-             keep = keep, drop = drop, order = order, file = file, label = label, 
+             keep = keep, drop = drop, order = order, 
+             file = file, label = label, 
              se.below = se.below,
              signif.code = signif.code, fixef_sizes = fixef_sizes, 
              fixef_sizes.simplify = fixef_sizes.simplify,
@@ -3541,12 +3612,12 @@ etable_internal_latex = function(info){
     if((!is.null(keep) || !is.null(drop)) && length(group) == 0){
       if(!is.null(keep) && !any(grepl("^%", keep))){
         msg = paste0(" In particular, to 'keep' variables using their original names ", 
-                     "(before dict is applied), use the special character '%' first. ",
-                     "E.g. keep = \"%", keep[1], "\"")
+                     "(before dict is applied), use use the argument `keep_raw`. ",
+                     "E.g. keep_raw = {Q ? keep[1]}")
       } else if(!is.null(drop) && !any(grepl("^%", drop))){
         msg = paste0(" In particular, to 'drop' variables using their original names ",
-                     "(before dict is applied), use the special character '%' first. ", 
-                     "E.g. drop = \"%", drop[1], "\"")
+                     "(before dict is applied), use the argument `drop_raw`. ", 
+                     "E.g. drop_raw = {Q ? drop[1]}")
       } else {
         msg = ""
       }
