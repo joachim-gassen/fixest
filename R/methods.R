@@ -157,7 +157,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
   if(!is.null(x$collin.var)){
     n_collin = length(x$collin.var)
     collinearity_msg = sma("... {n_collin} variable{#s, were} removed because of collinearity ({enum.3 ? x$collin.var}{&n_collin>3; [full set in $collin.var]})\n")
-    if(isTRUE(x$iv) && any(grepl("^fit_", x$collin.var))){
+    if(isTRUE(x$is_iv) && any(grepl("^fit_", x$collin.var))){
       if(!any(grepl("^fit_", names(x$coefficients)))){
         iv_msg = "NOTE: all endogenous regressors were removed.\n"
       } else {
@@ -210,7 +210,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
     half_line = "OLS estimation"
   }
 
-  if(isTRUE(x$iv)){
+  if(isTRUE(x$is_iv)){
     first_line = sma("TSLS estimation\n",
                      "|- D.V.   : {x$iv_main_dep_var}\n",
                      "|- Endo.  : {', 'c ? get_vars(x$iv_endo_fml)}\n",
@@ -313,7 +313,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
           default_fit = c(default_fit, "wr2")
         }
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           default_fit = c(default_fit, "ivf1", "wh", "sargan")
         }
 
@@ -639,7 +639,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
 
 
   # IV
-  if(isTRUE(object$iv) && !isTRUE(dots$iv)){
+  if(isTRUE(object$is_iv) && !isTRUE(dots$iv)){
     stage = unique(stage)
     res = list()
 
@@ -2896,7 +2896,7 @@ predict.fixest = function(object, newdata, type = c("response", "link"), se.fit 
   } else if(length(linear.varnames) > 0){
     # Checking all variables are there
 
-    if(isTRUE(object$iv) && object$iv_stage == 2){
+    if(isTRUE(object$is_iv) && object$iv_stage == 2){
       names(coef) = gsub("^fit_", "", names(coef))
       linear.varnames = c(linear.varnames, all_vars_with_i_prefix(object$fml_all$iv[[2]]))
       iv_fml = object$fml_all$iv
@@ -3594,14 +3594,14 @@ formula.fixest = function(x, type = "full", fml.update = NULL,
     }
     
     if(".endo" %in% vars){
-      if(!isTRUE(x$iv)){
+      if(!isTRUE(x$is_iv)){
         stop("In the argument `fml.update`, the variable `.endo` is only accessible when `x` is an IV estimation, which is not the case here.")
       }
       res = replace_target_with_expr(res, quote(.endo), formula(x, "iv.endo")[[2]])
     }
     
     if(".inst" %in% vars){
-      if(!isTRUE(x$iv)){
+      if(!isTRUE(x$is_iv)){
         stop("In the argument `fml.update`, the variable `.inst` is only accessible when `x` is an IV estimation, which is not the case here.")
       }
       res = replace_target_with_expr(res, quote(.inst), formula(x, "iv.inst")[[2]])
@@ -3831,7 +3831,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     stop("model.matrix method not available for fixest estimations obtained from fit methods.")
   }
 
-  if(any(grepl("^iv", type)) && !isTRUE(object$iv)){
+  if(any(grepl("^iv", type)) && !isTRUE(object$is_iv)){
     stopi("The type{$s, enum.Q, is ! {'^iv'get ? type}} only valid for IV estimations.")
   }
 
@@ -3890,7 +3890,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
     fake_intercept = !is.null(object$fixef_vars) && !(!is.null(object$slope_flag) && all(object$slope_flag < 0))
 
     fml = fml_linear
-    if(isTRUE(object$iv)){
+    if(isTRUE(object$is_iv)){
       fml_iv = object$fml_all$iv
       fml = .xpd(..lhs ~ ..endo + ..rhs, 
                  ..lhs = fml[[2]], 
@@ -4030,7 +4030,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
   if("iv.rhs1" %in% type){
     # First stage
 
-    if(!isTRUE(object$iv)){
+    if(!isTRUE(object$is_iv)){
       stop("In model.matrix, the type 'iv.rhs1' is only valid for IV models. This estimation is no IV.")
     }
 
@@ -4067,7 +4067,7 @@ model.matrix.fixest = function(object, data = NULL, type = "rhs", sample = "esti
   if("iv.rhs2" %in% type){
     # Second stage
 
-    if(!isTRUE(object$iv)){
+    if(!isTRUE(object$is_iv)){
       stop("In model.matrix, the type 'iv.rhs2' is only valid for second stage IV models. This estimation is not even IV.")
     }
 
@@ -4390,7 +4390,7 @@ hatvalues.fixest = function(model, exact = TRUE, boot.size = 1000, ...){
     stop("The method 'hatvalues.fixest' cannot be applied to 'lean' fixest objects. Please re-estimate with 'lean = FALSE'.")
   }
 
-  if (!is.null(model$iv)) {
+  if (!is.null(model$is_iv)) {
     stop("The method 'hatvalues.fixest' cannot be applied to IV models.")
   }
 

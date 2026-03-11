@@ -774,7 +774,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
           df1 = degrees_freedom(x, "k") - 1
           df2 = degrees_freedom(x, "t")
 
-          if(isTRUE(x$iv) && x$iv_stage == 2){
+          if(isTRUE(x$is_iv) && x$iv_stage == 2){
             # We need to compute the SSR
             w = 1
             if(!is.null(x$weights)) w = x$weights
@@ -807,7 +807,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
 
       } else if(root == "ivfall"){
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           if(x$iv_stage == 1){
             df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
             df2 = degrees_freedom(x, "resid")
@@ -839,7 +839,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root == "ivf1"){
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
           df2 = degrees_freedom(x, "resid", stage = 1)
 
@@ -866,7 +866,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "ivf2"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # f stat for the second stage
 
           df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
@@ -886,7 +886,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "kpr"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # The KP rank test is computed in a specific function
 
           vec = kp_stat(x)
@@ -897,7 +897,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "cd"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # The KP rank test is computed in a specific function
 
           vec = cd_stat(x)
@@ -932,7 +932,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root == "ivwaldall"){
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           if(x$iv_stage == 1){
 
             df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd)
@@ -965,7 +965,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
 
       } else if(root %in% "ivwald1"){
 
-        if(isTRUE(x$iv)){
+        if(isTRUE(x$is_iv)){
           df1 = degrees_freedom(x, vars = x$iv_inst_names_xpd, stage = 1)
           df2 = degrees_freedom(x, "resid", stage = 1)
 
@@ -1013,7 +1013,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "ivwald2"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # wald stat for the second stage
 
           df1 = degrees_freedom(x, vars = x$iv_endo_names_fit)
@@ -1031,7 +1031,7 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         }
 
       } else if(root == "wh"){
-        if(isTRUE(x$iv) && x$iv_stage == 2){
+        if(isTRUE(x$is_iv) && x$iv_stage == 2){
           # Wu Hausman stat for the second stage
           vec = x$iv_wh
           res_all[[type]] = set_value(vec, value)
@@ -1369,7 +1369,7 @@ r2 = function(x, type = "all", full_names = FALSE){
   isFixef = "fixef_vars" %in% names(x)
   n = nobs(x)
   
-  if(isTRUE(x$iv) && identical(x$iv_stage, 2)){
+  if(isTRUE(x$is_iv) && identical(x$iv_stage, 2)){
     x$ssr = cpp_ssq(x$iv_residuals)
   }
 
@@ -1531,7 +1531,7 @@ degrees_freedom = function(x, type, vars = NULL, vcov = NULL, se = NULL, cluster
   check_arg(stage, "integer scalar GE{1} LE{2}")
   check_arg(vars, "character vector no na")
 
-  if(stage == 1 && isTRUE(x$iv) && x$iv_stage == 2){
+  if(stage == 1 && isTRUE(x$is_iv) && x$iv_stage == 2){
     x = x$iv_first_stage[[1]]
   }
 
@@ -1632,7 +1632,7 @@ kp_stat = function(x){
   # from @matthieugomez (see https://github.com/FixedEffects/Vcov.jl)
 
 
-  if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+  if(!isTRUE(x$is_iv) || !x$iv_stage == 2) return(NA)
 
   n_endo = length(x$iv_first_stage)
   n_inst = x$iv_n_inst
@@ -1754,7 +1754,7 @@ cd_stat = function(x){
   # x: fixest object
   #
 
-  if(!isTRUE(x$iv) || !x$iv_stage == 2) return(NA)
+  if(!isTRUE(x$is_iv) || !x$iv_stage == 2) return(NA)
 
   # Necessary data
   X = model.matrix(x, type = "iv.endo")

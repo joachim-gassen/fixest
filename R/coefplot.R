@@ -2120,7 +2120,7 @@ coefplot_prms = function(all_models, vcov = NULL, se, ci_low, ci_high, x, x.shif
 
       # avoids bug with IVs => problem if user names the variables that way
       is_IV = FALSE
-      if(isTRUE(object$iv) && identical(object$iv_stage, 2)){
+      if(isTRUE(object$is_iv) && identical(object$iv_stage, 2)){
         all_vars = gsub("^fit_", "", all_vars)
         names(estimate) = all_vars
       }

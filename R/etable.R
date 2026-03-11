@@ -2246,7 +2246,7 @@ results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage
 
   # If vcov is provided, we use summary
   # if is_mult, we'll have to unroll the results
-  check_mult = any(qui_iv <- sapply(all_models, function(x) isTRUE(x$iv)))
+  check_mult = any(qui_iv <- sapply(all_models, function(x) isTRUE(x$is_iv)))
   is_mult = FALSE
   if(check_mult){
     stage = unique(stage)

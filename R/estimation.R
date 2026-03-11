@@ -1372,7 +1372,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
             
           } else {
             mema("[IV error] Problematic 1st stage results:")
-            my_res$iv = FALSE
+            my_res$is_iv = FALSE
             print(my_res)
             
             stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")
@@ -1537,7 +1537,7 @@ feols = function(fml, data, vcov, weights, offset, subset, split, fsplit, split.
           } else {
             
             mema("[IV error] Problematic 1st stage results:")
-            my_res$iv = FALSE
+            my_res$is_iv = FALSE
             print(my_res)
             
             stopi("{msg}\nFor information, above are reported the results of the 1st stage estimation.")

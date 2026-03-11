@@ -3215,7 +3215,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
   if(isFit) res$is_fit = TRUE
 
   if(do_iv){
-    res$iv = TRUE
+    res$is_iv = TRUE
     res$iv_inst_names = inst_names
     res$iv_n_inst = ncol(iv.mat)
     res$iv_endo_names = iv_lhs_names
@@ -4170,7 +4170,7 @@ reshape_env = function(env, obs2keep = NULL, lhs = NULL, rhs = NULL, assign_lhs 
     }
     res$nparams = K
 
-    if(!isLinear && !isTRUE(res$iv)){
+    if(!isLinear && !isTRUE(res$is_iv)){
       res$onlyFixef = TRUE
     }
   }

@@ -1941,7 +1941,7 @@ vcov_hc2_hc3_internal = function(bread, scores, sandwich, nthreads, vcov_name,
   # we don't allow ssc changes => HC2/HC3 **are** SSCs
   
   # For HC2/HC3, need to divide scores by the hatvalues
-  if (isTRUE(object$iv)) {
+  if (isTRUE(object$is_iv)) {
     stopi("The VCOV type {bq ? vcov_name} is not defined in IV estimations.")
   }
   

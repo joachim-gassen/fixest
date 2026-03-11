@@ -77,7 +77,7 @@ sparse_model_matrix = function(object, data, type = "rhs", sample = "estimation"
     stop("sparse_model_matrix method not available for fixest estimations obtained from fit methods.")
   }
 
-  if (any(grepl("^iv", type)) && !isTRUE(object$iv)) {
+  if (any(grepl("^iv", type)) && !isTRUE(object$is_iv)) {
     stop("The type", enumerate_items(grep("^iv", type, value = TRUE), "s.is"), " only valid for IV estimations.")
   }
 
@@ -665,7 +665,7 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
 
   if (collin.rm) {
 
-    if (isTRUE(object$iv)) {
+    if (isTRUE(object$is_iv)) {
       fml_iv = object$fml_all$iv
       endo = fml_iv[[2]]        
       # Trick to get the rhs variables as a character vector
@@ -683,7 +683,7 @@ vars_to_sparse_mat = function(vars, data, collin.rm = FALSE, object = NULL,
       coef_names = names(object$coefficients)
       add_intercept = "(Intercept)" %in% coef_names
     } else if (type == "rhs") {
-      if (isTRUE(object$iv)) {
+      if (isTRUE(object$is_iv)) {
         coef_names = c(endo, names(object$coefficients))
         coef_names = coef_names[!grepl("^fit_", coef_names)]
         add_intercept = "(Intercept)" %in% coef_names
