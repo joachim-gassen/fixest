@@ -25,7 +25,7 @@ export(coefplot, iplot)
 # dof
 export(ssc, degrees_freedom)
 # Lag related
-export(panel, unpanel, f, l, d, lag_fml)
+export(panel, unpanel, lag_fml)
 # factor/interactions/binning
 export(i, bin, ref)
 # macro
