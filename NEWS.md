@@ -67,8 +67,6 @@
 
 - improve the startup message: i) remove false positives, ii) write the previous fixest version in the message, making it clearer which modifications the update entails
 
-- `panel`: the functions `f`, `l`, and `d` are not exported any more
-
 # fixest 0.13.2
 
 ## Bug fixes

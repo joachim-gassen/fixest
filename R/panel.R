@@ -958,9 +958,9 @@ unpanel = function(x){
     IS_DT = TRUE
     # data.table is really hard to handle....
     # Not very elegant... but that's life!
-    
+
     # When modifications are too risky, I dissolve the panel
-    
+
     mc_new = mc
     mc_new[[1]] = as.name('[')
 
@@ -984,7 +984,7 @@ unpanel = function(x){
       mc_new[[1]] = as.name('[.data.table')
       my_frame = parent.frame()
       assign("[.data.table", asNamespace("data.table")[["[.data.table"]], my_frame)
-      eval(mc_new, envir = list(l = l, f = f, d = d), enclos = my_frame)
+      eval(mc_new, my_frame)
 
       # what a pain...
       out = TRUE
