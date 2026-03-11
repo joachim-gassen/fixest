@@ -2965,7 +2965,7 @@ case.names.fixest = function(object, ...){
 #' # Checking the convergence
 #' conv = check_conv_feols(est)
 #'
-#' # We can check that al values are close to 0
+#' # We can check that all values are close to 0
 #' summary(conv)
 #'
 #' summary(conv, "detail")
@@ -3013,8 +3013,8 @@ check_conv_feols = function(x){
   info = demean(x, fe_info = TRUE)
 
   res = check_conv(y = info$y, X = info$X, fixef_id_list = info$fixef_id_list,
-           slope_flag = info$slope_flag, slope_vars = info$slope_vars,
-           weights = info$weights, full = TRUE, fixef_names = fixef_names)
+                   slope_flag = info$slope_flag, slope_vars = info$slope_vars,
+                   weights = info$weights, full = TRUE, fixef_names = fixef_names)
 
   names(res) = info$varnames
 

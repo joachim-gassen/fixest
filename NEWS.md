@@ -61,6 +61,8 @@
 
 - in `update.fixest`, the argument use_calling_env becomes context dependent (follows #618)
 
+- improve the startup message: i) remove false positives, ii) write the previous fixest version in the message, making it clearer which modifications the update entails
+
 # fixest 0.13.2
 
 ## Bug fixes
