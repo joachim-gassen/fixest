@@ -83,7 +83,6 @@ if(is.factor(data.frame(x = "bonjour")$x)){
   options("fixest_fl_authorized" = FALSE)
 
   setFixest_coefplot("all", reset = TRUE)
-  setFixest_ssc()
   setFixest_etable()
   setFixest_vcov(all = "iid")
   setFixest_dict(c("(Intercept)" = "Constant"))

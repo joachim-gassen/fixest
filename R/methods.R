@@ -385,7 +385,7 @@ print.fixest = function(x, n, type = "table", fitstat = NULL, ...){
 #' and there are multiple endogenous regressors or if `stage` is of length 2, then an 
 #' object of class `fixest_multi` is returned.
 #' @param object A `fixest` object. Obtained using the functions [`femlm`], [`feols`] or [`feglm`].
-#' @param ssc An object of class `ssc.type` obtained with the function [`ssc`]. Represents 
+#' @param ssc An object of class `ssc_type` obtained with the function [`ssc`]. Represents 
 #' how the degree of freedom correction should be done.You must use the function [`ssc`] 
 #' for this argument. The arguments and defaults of the function [`ssc`] are: 
 #' `K.adj = TRUE`, `K.fixef = "nonnested"`, `G.adj = TRUE`, `G.df = "min"`, 

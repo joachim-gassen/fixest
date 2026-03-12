@@ -750,7 +750,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
   # ssc related => we accept NULL
   # we check ssc since it can be used by the funs
   if(missnull(ssc)) ssc = getFixest_ssc()
-  check_arg(ssc, "class(ssc.type)", 
+  check_arg(ssc, "class(ssc_type)", 
             .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
@@ -1004,7 +1004,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' replicate standard-errors from other software.
 #'
 #' @return
-#' It returns a `ssc.type` object.
+#' It returns a `ssc_type` object.
 #'
 #' @author
 #' Laurent Berge
@@ -1120,7 +1120,7 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 
   res = list(K.adj = K.adj, K.fixef = K.fixef, G.adj = G.adj, G.df = G.df,
              t.df = t.df, K.exact = K.exact)
-  class(res) = "ssc.type"
+  class(res) = "ssc_type"
 
   res
 }
@@ -1181,7 +1181,7 @@ vcov_hetero = function(x, type = "hc1", exact = TRUE, boot.size = NULL,
   slide_args(x, type = type, exact = exact, boot.size = boot.size, ssc = ssc)
   IS_REQUEST = is.null(x)
 
-  check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
+  check_value(ssc, "NULL class(ssc_type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
   # We create the request
@@ -1276,7 +1276,7 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
   slide_args(x, cluster = cluster, ssc = ssc)
   IS_REQUEST = is.null(x)
 
-  check_value(ssc, "NULL class(ssc.type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
+  check_value(ssc, "NULL class(ssc_type)", .message = "The argument 'ssc' must be an object created by the function ssc().")
 
 
   # We create the request
@@ -1461,7 +1461,7 @@ vcov_DK = function(x, time = NULL, lag = NULL, ssc = NULL, vcov_fix = TRUE){
   IS_REQUEST = is.null(x)
 
   check_value(lag, "NULL integer scalar GE{1}")
-  check_value(ssc, "NULL class(ssc.type)", 
+  check_value(ssc, "NULL class(ssc_type)", 
               .message = "The argument 'ssc' must be an object created by the function ssc().")
 
   # time
@@ -1507,7 +1507,7 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix
   IS_REQUEST = is.null(x)
 
   check_value(lag, "NULL integer scalar GE{1}")
-  check_value(ssc, "NULL class(ssc.type)", 
+  check_value(ssc, "NULL class(ssc_type)", 
               .message = "The argument 'ssc' must be an object created by the function ssc().")
 
   # unit
@@ -1631,7 +1631,7 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
              distance = distance, ssc = ssc)
   IS_REQUEST = is.null(x)
 
-  check_value(ssc, "NULL class(ssc.type)", 
+  check_value(ssc, "NULL class(ssc_type)", 
               .message = "The argument 'ssc' must be an object created by the function ssc().")
 
   # lat
@@ -2780,16 +2780,51 @@ is_function_in_it = function(x){
 ####
 
 
+print.ssc
+
 
 #' @rdname ssc
 #'
-#' @param ssc.type An object of class `ssc.type` obtained with the function [`ssc`].
-setFixest_ssc = function(ssc.type = ssc(), vcov_name = c("iid", "clustered")){
+#' @param ssc_type An object of class `ssc_type` obtained with the function [`ssc`].
+setFixest_ssc = function(ssc_type = ssc(), vcov_name = c("iid", "cluster")){
   
   check_arg(vcov_name, "character vector no na len(1,)")
 
-  if(!inherits(ssc.type, "ssc.type")){
+  if(!inherits(ssc_type, "ssc_type")){
     stop("The argument 'ssc' must be an object created by the function ssc().")
+  }
+  
+  # All valid VCOVs
+  all_vcov = getOption("fixest_vcov_builtin")
+  all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+  all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+  
+  check_set_arg(vcov_name, "multi match", .choices = all_vcov_names)
+  
+  # the default values
+  all_ssc = getOption("fixest_ssc", list())
+  
+  for(vcov in vcov_name){
+    browser()
+    vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
+    name = all_vcov[[vcov_id]]$name[1]
+    
+    all_ssc[[name]] = ssc_type
+  }
+
+  options("fixest_ssc" = all_ssc)
+}
+
+#' @rdname ssc
+getFixest_ssc = function(vcov_name = NULL){
+  
+  check_arg(vcov_name, "character scalar NULL")
+
+  all_ssc = getOption("fixest_ssc", list())
+  
+  if(is.null(vcov_name)){
+    attr(all_ssc, "default_ssc") = TRUE
+    return(all_ssc)
   }
   
   # All valid VCOVs
@@ -2800,28 +2835,20 @@ setFixest_ssc = function(ssc.type = ssc(), vcov_name = c("iid", "clustered")){
   check_set_arg(vcov_name, "match", .choices = all_vcov_names)
   
   vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
+  vcov_info = all_vcov[[vcov_id]]
+  name = vcov_info$name[1]
   
-  # the default values
-  all_ssc = getOption("fixest_ssc", list())
-  
-  
-
-  options("fixest_ssc" = ssc.type)
-}
-
-#' @rdname ssc
-getFixest_ssc = function(){
-
-  all_ssc = getOption("fixest_ssc")
-  if(!inherits(all_ssc, "ssc.type")){
-    warning("The value of getOption(\"fixest_ssc\") is currently not legal. Please use function setFixest_ssc to set it to an appropriate value.\nFor now it is reset.")
-    setFixest_ssc()
-    all_ssc = all_ssc()
+  vcov_ssc = all_ssc[[name]]
+  if(is.null(vcov_ssc)){
+    if(!is.null(vcov_info$default_ssc)){
+      vcov_ssc = vcov_info$default_ssc
+    } else {
+      # the fallback
+      vcov_ssc = ssc()
+    }
   }
-  
-  attr(all_ssc, "default_ssc") = TRUE
 
-  all_ssc
+  vcov_ssc
 }
 
 

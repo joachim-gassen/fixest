@@ -2131,7 +2131,7 @@ fixest_env = function(fml, data, family = c("poisson", "negbin", "logit", "gauss
 
   if(!missnull(ssc)){
     do_summary = TRUE
-    if(!identical(class(ssc), "ssc.type")){
+    if(!identical(class(ssc), "ssc_type")){
       stop("The argument 'ssc' must be an object obtained from the function ssc().")
     }
   } else {
