@@ -1892,6 +1892,8 @@ se.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
   res = mat[, 2]
   names(res) = row.names(mat)
+  
+  attr(res, "vcov_type") = attr(mat, "vcov_type")
 
   res
 }
@@ -1911,6 +1913,8 @@ tstat.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
   res = mat[, 3]
   names(res) = row.names(mat)
+  
+  attr(res, "vcov_type") = attr(mat, "vcov_type")
 
   res
 }
@@ -1930,6 +1934,8 @@ pvalue.fixest = function(object, vcov = NULL, ssc = NULL, cluster = NULL,
 
   res = mat[, 4]
   names(res) = row.names(mat)
+  
+  attr(res, "vcov_type") = attr(mat, "vcov_type")
 
   res
 }
@@ -3200,8 +3206,8 @@ confint.fixest = function(object, parm, level = 0.95, vcov, se, cluster,
     res = data.frame(lower_bound, upper_bound, row.names = parm_use)
     names(res) = bound_names
   }
-
-  attr(res, "vcov_type") = attr(se_all, "vcov_type")
+  
+  attr(res, "vcov_type") = attr(coeftable, "vcov_type")
 
   res
 }

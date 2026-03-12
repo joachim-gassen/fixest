@@ -937,6 +937,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     
     attr(vcov_mat, "ssc") = ssc
     attr(vcov_mat, "df.K") = K
+    
+    class(vcov_mat) = "fixest_vcov"
   } else {
     # We clean the attributes
     all_attr = names(attributes(vcov_mat))
@@ -944,8 +946,6 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
       attr(vcov_mat, v) = NULL
     }
   }
-  
-  class(vcov_mat) = "fixest_vcov"
 
   vcov_mat
 }
