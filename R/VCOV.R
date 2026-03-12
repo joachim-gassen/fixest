@@ -1777,6 +1777,7 @@ vcov_setup = function(){
 
   vcov_newey_west_setup = list(name = c("NW", "newey_west"),
                                fun_name = "vcov_newey_west_internal",
+                               ssc_default = ssc(K.adj = FALSE),
                                vcov_label = "Newey-West")
 
   vcov_newey_west_setup$vars = list(unit = unit, time = time)
@@ -1791,6 +1792,7 @@ vcov_setup = function(){
 
   vcov_driscoll_kraay_setup = list(name = c("DK", "driscoll_kraay"),
                                    fun_name = "vcov_driscoll_kraay_internal",
+                                   ssc_default = ssc(K.adj = FALSE),
                                    vcov_label = "Driscoll-Kraay")
 
   vcov_driscoll_kraay_setup$vars = list(time = time)
@@ -1816,6 +1818,7 @@ vcov_setup = function(){
 
   vcov_conley_setup = list(name = "conley", 
                            fun_name = "vcov_conley_internal", 
+                           ssc_default = ssc(K.adj = FALSE),
                            vcov_label = "Conley")
   vcov_conley_setup$vars = list(lat = lat, lng = lng)
   vcov_conley_setup$arg_main = c("cutoff", "pixel", "distance")
@@ -1829,6 +1832,7 @@ vcov_setup = function(){
 
   vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), 
                                fun_name = "vcov_conley_hac_internal", 
+                               ssc_default = ssc(K.adj = FALSE),
                                vcov_label = "Conley-HAC")
   # The variables (already defined earlier)
   unit_conleyHAC = unit
@@ -1926,7 +1930,9 @@ vcov_hetero_internal = function(bread, scores, sandwich, nthreads, ssc, n, K, ..
     
   }
   
-  if(ssc$K.adj){
+  # ssc must be provided excplicitly by the user
+  # default: K.adj = TRUE
+  if(isTRUE(attr(ssc, "default_ssc")) || ssc$K.adj){
     adj = n / (n - K)
     vcov_mat = vcov_mat * adj
   }
@@ -2142,14 +2148,14 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, n, K,
   } else {
     vcov_mat = meat
   }
-
-  if(ssc$G.adj){
-    vcov_mat = vcov_mat * n_time / (n_time - 1)
-  }
   
-  if(ssc$K.adj){
-    adj = (n - 1) / (n - K)
-    vcov_mat = vcov_mat * adj
+  # ssc must be provided excplicitly by the user
+  # default: K.adj = FALSE
+  if(!isTRUE(attr(ssc, "default_ssc"))){
+    if(ssc$K.adj){
+      adj = n / (n - K)
+      vcov_mat = vcov_mat * adj
+    }
   }
 
   attr(vcov_mat, "G") = n_time
@@ -2190,14 +2196,14 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, ssc, n, K,
   } else {
     vcov_mat = meat
   }
-
-  if(ssc$G.adj){
-    vcov_mat = vcov_mat * n_time / (n_time - 1)
-  }
   
-  if(ssc$K.adj){
-    adj = (n - 1) / (n - K)
-    vcov_mat = vcov_mat * adj
+  # ssc must be provided excplicitly by the user
+  # default: K.adj = FALSE
+  if(!isTRUE(attr(ssc, "default_ssc"))){
+    if(ssc$K.adj){
+      adj = n / (n - K)
+      vcov_mat = vcov_mat * adj
+    }
   }
 
   attr(vcov_mat, "G") = n_time
@@ -2302,9 +2308,13 @@ vcov_conley_internal = function(bread, scores, vars, ssc, n, K, sandwich, nthrea
     vcov_mat = meat
   }
   
-  if(ssc$K.adj){
-    adj = (n - 1) / (n - K)
-    vcov_mat = vcov_mat * adj
+  # ssc must be provided excplicitly by the user
+  # default: K.adj = FALSE
+  if(!isTRUE(attr(ssc, "default_ssc"))){
+    if(ssc$K.adj){
+      adj = n / (n - K)
+      vcov_mat = vcov_mat * adj
+    }
   }
 
   scale = if(metric == "km") 1 else 1 / 1.60934
@@ -2774,11 +2784,27 @@ is_function_in_it = function(x){
 #' @rdname ssc
 #'
 #' @param ssc.type An object of class `ssc.type` obtained with the function [`ssc`].
-setFixest_ssc = function(ssc.type = ssc()){
+setFixest_ssc = function(ssc.type = ssc(), vcov_name = c("iid", "clustered")){
+  
+  check_arg(vcov_name, "character vector no na len(1,)")
 
   if(!inherits(ssc.type, "ssc.type")){
     stop("The argument 'ssc' must be an object created by the function ssc().")
   }
+  
+  # All valid VCOVs
+  all_vcov = getOption("fixest_vcov_builtin")
+  all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
+  all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+  
+  check_set_arg(vcov_name, "match", .choices = all_vcov_names)
+  
+  vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
+  
+  # the default values
+  all_ssc = getOption("fixest_ssc", list())
+  
+  
 
   options("fixest_ssc" = ssc.type)
 }
@@ -2786,12 +2812,16 @@ setFixest_ssc = function(ssc.type = ssc()){
 #' @rdname ssc
 getFixest_ssc = function(){
 
-  ssc = getOption("fixest_ssc")
-  if(!inherits(ssc, "ssc.type")){
-    stop("The value of getOption(\"fixest_ssc\") is currently not legal. Please use function setFixest_dict to set it to an appropriate value.")
+  all_ssc = getOption("fixest_ssc")
+  if(!inherits(all_ssc, "ssc.type")){
+    warning("The value of getOption(\"fixest_ssc\") is currently not legal. Please use function setFixest_ssc to set it to an appropriate value.\nFor now it is reset.")
+    setFixest_ssc()
+    all_ssc = all_ssc()
   }
+  
+  attr(all_ssc, "default_ssc") = TRUE
 
-  ssc
+  all_ssc
 }
 
 

@@ -39,6 +39,20 @@
 
 - in `coefplot`: the argument `zero` now adds 0 to the y-axis (instead of only turning highlighting on/off)
 
+## Small sample correction
+
+- the way the small sample correction works has been slightly modified
+
+- the argument `ssc` remains unchanged for the IID and clustered standard-errors, and its default can still be set globaly with `setFixest_ssc()`
+
+- for all other VCOVs (i.e. Heteroskedastic, Newey-West, Driscoll-Kraay, Conley):
+  - the user always need to provide the argument `ssc` explicitly and cannot rely on the global default any more
+  - only the argument `K.adj` is valid and its default is `TRUE` for hetero VCOVs (corresponds to HC1) and `FALSE` for Newey-West, Driscoll-Kraay and Conley
+  - the adjustment, for non IID, non clustered VCOVs, becomes `n/(n-K)`
+  - for Newey-West and Driscoll-Kraay there was another minor adjustment linked to `G.adj` => this one is dropped entirely
+
+- consequences: users using Newey-West, Driscoll-Kraay or Conley VCOVs may have slightly smaller standard-errors following this update. To get to the previous 
+
 ## Other changes
 
 - VCOV: the test for non positive definite (PD) matrices becomes `x <= 0` to avoid overfixing. This leads to a less aggressive matrix regularization. Even if the effect of fixing was negligible, the messages were annoying. Thanks to @MatthieuStigler for pushing this.
@@ -98,6 +112,8 @@
   - `cluster.df` => `G.df`
   
   Retro compatibility is ensured. Thanks to Kyle Butts and Grant McDermott for the brainstorm!
+
+- on `ssc`: argument `G.adj` does not apply to hetero standard-errors any more
 
 - in the functions `coefplot` and `iplot`: the argument `object` is removed, now all models need to be passed in `...`. The dots do not accept arguments to summary methods any more. Retro-compatibility partly ensured.
 

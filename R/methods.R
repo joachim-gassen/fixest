@@ -817,7 +817,7 @@ summary.fixest = function(object, vcov = NULL, cluster = NULL, ssc = NULL,
 
 
 #' @rdname summary.fixest
-summary.fixest_list = function(object, se, cluster, ssc = getFixest_ssc(), vcov = NULL, 
+summary.fixest_list = function(object, se, cluster, ssc = NULL, vcov = NULL, 
                                stage = 2, lean = FALSE, n, ...){
 
   dots = list(...)

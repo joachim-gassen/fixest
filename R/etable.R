@@ -1542,7 +1542,7 @@ gen_etable_aliases = function(){
   update_file("./R/alias_etable.R", text)
 }
 
-results2formattedList = function(dots, vcov = NULL, ssc = getFixest_ssc(), stage = 2,
+results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
                                  agg = NULL, .vcov_args = NULL, digits = 4,
                                  digits.stats = 5, fitstat_all, se.row = NULL, 
                                  se.below = NULL, 
