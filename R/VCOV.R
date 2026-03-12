@@ -1685,6 +1685,12 @@ vcov_conley = function(x, lat = NULL, lon = NULL, cutoff = NULL, pixel = 0,
 ####
 
 
+ssc_available = function(K = FALSE, G = FALSE){
+  res = c()
+  if(K) res = "K"
+  if(G) res = c(res, "G")
+  res
+}
 
 vcov_setup = function(){
 
@@ -1695,6 +1701,7 @@ vcov_setup = function(){
   vcov_iid_setup = list(name = c("iid", "normal", "standard"), 
                         fun_name = "vcov_iid_internal", 
                         ssc_allow_nonnested = TRUE,
+                        ssc_available = ssc_available(K = TRUE),
                         vcov_label = "IID")
 
   #
@@ -1703,6 +1710,7 @@ vcov_setup = function(){
 
   vcov_hetero_setup = list(name = c("hetero", "white", "hc1"), 
                            fun_name = "vcov_hetero_internal", 
+                           ssc_available = ssc_available(K = TRUE),
                            vcov_label = "Heteroskedasticity-robust")
   
   vcov_hc2_setup = list(name = "hc2", 
@@ -1720,6 +1728,7 @@ vcov_setup = function(){
   vcov_clust_setup = list(name = c("cluster", ""), 
                           fun_name = "vcov_cluster_internal", 
                           ssc_allow_nonnested = TRUE,
+                          ssc_available = ssc_available(K = TRUE, G = TRUE),
                           vcov_label = "Clustered")
   
   vcov_clust_setup$vars = list(
@@ -1746,6 +1755,7 @@ vcov_setup = function(){
   vcov_twoway_setup = list(name = "twoway", 
                            fun_name = "vcov_cluster_internal", 
                            ssc_allow_nonnested = TRUE,
+                           ssc_available = ssc_available(K = TRUE, G = TRUE),
                            vcov_label = "Clustered")
   vcov_twoway_setup$vars = list(cl1 = cl1, cl2 = cl2)
   vcov_twoway_setup$patterns = c("", "cl1 + cl2")
@@ -1753,6 +1763,7 @@ vcov_setup = function(){
   vcov_threeway_setup = list(name = "threeway", 
                              fun_name = "vcov_cluster_internal", 
                              ssc_allow_nonnested = TRUE,
+                             ssc_available = ssc_available(K = TRUE, G = TRUE),
                              vcov_label = "Clustered")
   vcov_threeway_setup$vars = list(cl1 = cl1, cl2 = cl2, cl3 = cl3)
   vcov_threeway_setup$patterns = c("", "cl1 + cl2 + cl3")
@@ -1760,6 +1771,7 @@ vcov_setup = function(){
   vcov_fourway_setup = list(name = "fourway", 
                             fun_name = "vcov_cluster_internal", 
                             ssc_allow_nonnested = TRUE,
+                            ssc_available = ssc_available(K = TRUE, G = TRUE),
                             vcov_label = "Clustered")
   vcov_fourway_setup$vars = list(cl1 = cl1, cl2 = cl2, cl3 = cl3, cl4 = cl4)
   vcov_fourway_setup$patterns = c("", "cl1 + cl2 + cl3 + cl4")
@@ -1778,6 +1790,7 @@ vcov_setup = function(){
   vcov_newey_west_setup = list(name = c("NW", "newey_west"),
                                fun_name = "vcov_newey_west_internal",
                                ssc_default = ssc(K.adj = FALSE),
+                               ssc_available = ssc_available(K = TRUE),
                                vcov_label = "Newey-West")
 
   vcov_newey_west_setup$vars = list(unit = unit, time = time)
@@ -1793,6 +1806,7 @@ vcov_setup = function(){
   vcov_driscoll_kraay_setup = list(name = c("DK", "driscoll_kraay"),
                                    fun_name = "vcov_driscoll_kraay_internal",
                                    ssc_default = ssc(K.adj = FALSE),
+                                   ssc_available = ssc_available(K = TRUE),
                                    vcov_label = "Driscoll-Kraay")
 
   vcov_driscoll_kraay_setup$vars = list(time = time)
@@ -1819,6 +1833,7 @@ vcov_setup = function(){
   vcov_conley_setup = list(name = "conley", 
                            fun_name = "vcov_conley_internal", 
                            ssc_default = ssc(K.adj = FALSE),
+                           ssc_available = ssc_available(K = TRUE),
                            vcov_label = "Conley")
   vcov_conley_setup$vars = list(lat = lat, lng = lng)
   vcov_conley_setup$arg_main = c("cutoff", "pixel", "distance")
@@ -1833,6 +1848,7 @@ vcov_setup = function(){
   vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), 
                                fun_name = "vcov_conley_hac_internal", 
                                ssc_default = ssc(K.adj = FALSE),
+                               ssc_available = ssc_available(K = TRUE),
                                vcov_label = "Conley-HAC")
   # The variables (already defined earlier)
   unit_conleyHAC = unit
@@ -2780,7 +2796,64 @@ is_function_in_it = function(x){
 ####
 
 
-print.ssc
+#' Method to print the type of small sample correction
+#' 
+#' Pretty print for the small sample correction obtained from [`ssc`]
+#' 
+#' @param x An object of class `ssc_type`, obtained from the function [`ssc`].
+#' 
+#' @return 
+#' This function does not return anything.
+#' 
+#' @examples 
+#' 
+#' # ssc() is just a list
+#' unclass(ssc())
+#' 
+#' # print of ssc, much more compactly
+#' ssc()
+#' 
+print.ssc_type = function(x, ...){
+  
+  available = attr(x, "available")
+  vcov_label = attr(x, "vcov_label")
+  
+  if(is.null(vcov_label)){
+    # this means this is a plain ssc call from the user
+    catma(
+      "Small sample correction:\n", 
+      "K.adj = {x$K.adj}, K.fixef = {Q ? x$K.fixef}, K.exact = {x$K.exact}\n",
+      "G.adj = {x$G.adj}, G.df = {Q ? x$G.df}, t.df = {Q ? x$t.df}\n"
+    )
+    return(invisible(NULL))
+  }
+  
+  # Now ssc is from getFixest_ssc where we added information on the VCOV type
+  
+  if(is.null(available)){
+    catma("No small sample correction available for {vcov_label} VCOVs\n")
+    return(invisible(NULL))
+  }
+  
+  line_K = ""
+  line_G = ""
+  
+  if("K" %in% available){
+    line_K = sma("K.adj = {x$K.adj}, K.fixef = {Q ? x$K.fixef}, K.exact = {x$K.exact}\n")
+  }
+  
+  if("G" %in% available){
+    line_G = sma("G.adj = {x$G.adj}, G.df = {Q ? x$G.df}, t.df = {Q ? x$t.df}\n")
+  }
+  
+  catma(
+    "Small sample correction for {vcov_label} VCOV:\n", 
+    line_K,
+    line_G
+  )
+  
+  
+}
 
 
 #' @rdname ssc
@@ -2805,17 +2878,47 @@ setFixest_ssc = function(ssc_type = ssc(), vcov_name = c("iid", "cluster")){
   all_ssc = getOption("fixest_ssc", list())
   
   for(vcov in vcov_name){
-    browser()
     vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
-    name = all_vcov[[vcov_id]]$name[1]
+    vcov_info = all_vcov[[vcov_id]]
+    name = vcov_info$name[1]
     
-    all_ssc[[name]] = ssc_type
+    my_ssc = ssc_type
+    if(!is.null(vcov_info$ssc_available)){
+      attr(my_ssc, "available") = vcov_info$ssc_available
+    }
+    
+    attr(my_ssc, "vcov_label") = vcov_info$vcov_label
+    
+    all_ssc[[name]] = my_ssc
   }
 
   options("fixest_ssc" = all_ssc)
 }
 
-#' @rdname ssc
+#' Gets the default values for the small sample correction
+#' 
+#' Gets the default small sample correction, of class `ssc_type`, for specific `fixest` VCOVs
+#' 
+#' @param vcov_name A character scalar naming the type of VCOV, or `NULL`. It should give
+#'  the name of a valid `fixest` VCOV (see [`vcov.fixest`]). If so, an object of class 
+#' `ssc_type` is returned.
+#' If `NULL`, the list of all small sample corrections (of class `ssc_type`) 
+#' which have been set by the user is returned.  
+#' 
+#' @return 
+#' If `vcov_name` is a valid `fixest` VCOV name, an object of class `ssc_type` is returned, 
+#' it corresponds to the default small sample correction (SSC) for this VCOV.
+#' 
+#' If `NULL`, all the SSCs that have been set by the user with [`setFixest_ssc`] are returned.
+#' 
+#' @examples 
+#' 
+#' # default SSC for iid
+#' getFixest_ssc("iid")
+#' 
+#' # in a fresh session, the default for Newey West VCOVs is different:
+#' getFixest_ssc("NW")
+#' 
 getFixest_ssc = function(vcov_name = NULL){
   
   check_arg(vcov_name, "character scalar NULL")
@@ -2834,18 +2937,22 @@ getFixest_ssc = function(vcov_name = NULL){
   
   check_set_arg(vcov_name, "match", .choices = all_vcov_names)
   
-  vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
+  vcov_id = which(sapply(all_vcov, function(x) vcov_name %in% x$name))
   vcov_info = all_vcov[[vcov_id]]
   name = vcov_info$name[1]
   
   vcov_ssc = all_ssc[[name]]
   if(is.null(vcov_ssc)){
-    if(!is.null(vcov_info$default_ssc)){
-      vcov_ssc = vcov_info$default_ssc
+    if(!is.null(vcov_info$ssc_default)){
+      vcov_ssc = vcov_info$ssc_default
     } else {
       # the fallback
       vcov_ssc = ssc()
     }
+    
+    attr(vcov_ssc, "vcov_label") = vcov_info$vcov_label
+    attr(vcov_ssc, "available") = vcov_info$ssc_available
+    
   }
 
   vcov_ssc
