@@ -930,9 +930,9 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
     }
 
     if(is.null(attr(vcov_mat, "vcov_type", exact = TRUE))){
-      type_info = attr(vcov_mat, "type_info")
-      attr(vcov_mat, "vcov_type") = paste0(vcov_select$vcov_label, type_info)
-      attr(vcov_mat, "type_info") = NULL
+      vcov_type_info = attr(vcov_mat, "vcov_type_info")
+      attr(vcov_mat, "vcov_type") = paste0(vcov_select$vcov_label, vcov_type_info)
+      attr(vcov_mat, "vcov_type_info") = NULL
     }
     
     attr(vcov_mat, "ssc") = ssc
@@ -974,7 +974,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' the number of parameters is equal to the number of variables plus the number of 
 #' fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
 #' @param K.exact Logical, default is `FALSE`. If there are 2 or more fixed-effects, 
-#' these fixed-effects they can be irregular, meaning they can provide the same information. 
+#' these fixed-effects can be irregular, meaning they can provide the same information. 
 #' If so, the "real" number of parameters should be lower than the total number of 
 #' fixed-effects. If `K.exact = TRUE`, then [`fixef.fixest`] is first run to 
 #' determine the exact number of parameters among the fixed-effects. Mostly, panels of 
@@ -2046,7 +2046,7 @@ vcov_cluster_internal = function(bread, scores, vars, ssc, object, n, K,
 
   var_names_all = var_names_all[nchar(var_names_all) > 0]
   if(length(var_names_all) > 0){
-    attr(vcov_mat, "type_info") = sma(" ({' & 'c ? var_names_all})")
+    attr(vcov_mat, "vcov_type_info") = sma(" ({' & 'c ? var_names_all})")
   } else {
     attr(vcov_mat, "vcov_type") = switch(nway,
                                     "1" = "Clustered",
@@ -2155,7 +2155,7 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, n, K,
   attr(vcov_mat, "G") = n_time
   attr(vcov_mat, "min_cluster_size") = n_time
 
-  attr(vcov_mat, "type_info") = paste0(" (L=", lag, ")")
+  attr(vcov_mat, "vcov_type_info") = paste0(" (L=", lag, ")")
 
   vcov_mat
 }
@@ -2203,7 +2203,7 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, ssc, n, K,
   attr(vcov_mat, "G") = n_time
   attr(vcov_mat, "min_cluster_size") = n_time
 
-  attr(vcov_mat, "type_info") = paste0(" (L=", lag, ")")
+  attr(vcov_mat, "vcov_type_info") = paste0(" (L=", lag, ")")
 
   vcov_mat
 }
@@ -2309,7 +2309,7 @@ vcov_conley_internal = function(bread, scores, vars, ssc, n, K, sandwich, nthrea
 
   scale = if(metric == "km") 1 else 1 / 1.60934
 
-  attr(vcov_mat, "type_info") = paste0(" (", cutoff * scale, metric, ")")
+  attr(vcov_mat, "vcov_type_info") = paste0(" (", cutoff * scale, metric, ")")
 
   vcov_mat
 }

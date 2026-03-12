@@ -63,7 +63,7 @@ Finally, `vcov = "conley"` accounts for spatial correlation of the errors.
 
 ### The argument `ssc`
 
-The type of small sample correction applied is defined by the argument `ssc` which accepts only objects produced by the function `ssc`. The main arguments of this function are `K.adj`, `K.fixef` and `G.adj`. I detail each of them below.
+The type of small sample correction applied is defined by the argument `ssc` which accepts only objects produced by the function `ssc`. The main arguments of this function are `K.adj`, `K.fixef` and `G.adj`. Each of them is detailed below.
 
 
 Say you have $\tilde{V}$ the variance-covariance matrix (henceforth VCOV) before any small sample adjustment. Argument `K.adj` can be equal to `TRUE` or `FALSE`, leading to the following adjustment:
@@ -126,13 +126,13 @@ This section illustrates how the results from `fixest` compares with the ones fr
 is_plm = requireNamespace("plm", quietly = TRUE)
 
 if(!is_plm){
-    knitr::opts_chunk$set(eval = FALSE)
-    cat("Evaluation of the next chunks requires 'plm' which is not installed.")
+  knitr::opts_chunk$set(eval = FALSE)
+  cat("Evaluation of the next chunks requires 'plm' which is not installed.")
 } else {
-    knitr::opts_chunk$set(eval = TRUE)
-    
-    library(plm)
-    library(sandwich)
+  knitr::opts_chunk$set(eval = TRUE)
+  
+  library(plm)
+  library(sandwich)
 }
 
 ```
