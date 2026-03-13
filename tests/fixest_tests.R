@@ -1576,11 +1576,11 @@ if(requireNamespace("plm", quietly = TRUE)){
   
   # NW
   se_plm_NW = se(plm::vcovNW(est_panel_plm))["capital"]
-  test(se(est_panel_feols, vcov = NW ~ ssc(adj = FALSE, cluster.adj = FALSE)), se_plm_NW)
+  test(se(est_panel_feols, vcov = NW ~ ssc(K.adj = FALSE, G.adj = FALSE)), se_plm_NW)
 
   # DK
   se_plm_DK = se(plm::vcovSCC(est_panel_plm))["capital"]
-  test(se(est_panel_feols, vcov = DK ~ ssc(adj = FALSE, cluster.adj = FALSE)), se_plm_DK)
+  test(se(est_panel_feols, vcov = DK ~ ssc(K.adj = FALSE, G.adj = FALSE)), se_plm_DK)
 }
 
 #

@@ -2805,6 +2805,9 @@ is_function_in_it = function(x){
 #' @return 
 #' This function does not return anything.
 #' 
+#' @seealso 
+#' [`vcov.fixest`], [`ssc`], [`setFixest_ssc`], [`getFixest_ssc`]
+#' 
 #' @examples 
 #' 
 #' # ssc() is just a list
