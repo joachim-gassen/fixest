@@ -1950,7 +1950,7 @@ vcov_hetero_internal = function(bread, scores, sandwich, nthreads, ssc, n, K, ..
   
   # ssc must be provided excplicitly by the user
   # default: K.adj = TRUE
-  if(isTRUE(attr(ssc, "default_ssc")) || ssc$K.adj){
+  if(ssc$K.adj){
     adj = n / (n - K)
     vcov_mat = vcov_mat * adj
   }
@@ -2167,13 +2167,21 @@ vcov_newey_west_internal = function(bread, scores, vars, ssc, n, K,
     vcov_mat = meat
   }
   
-  # ssc must be provided excplicitly by the user
-  # default: K.adj = FALSE
-  if(!isTRUE(attr(ssc, "default_ssc"))){
-    if(ssc$K.adj){
-      adj = n / (n - K)
-      vcov_mat = vcov_mat * adj
-    }
+  # the adjustment
+  # NOTE that if lag = 0 and we're in a pure time series (ie T = n) => we end up with 
+  # adj = (n - 1)/(n - k) * T / (T - 1) = (n - 1)/(n - k) * n / (n - 1) = n / (n - k)
+  # => equivalent to HC1
+  adj = 1
+  if(ssc$G.adj){
+    adj = n_time / (n_time - 1)
+  }
+  
+  if(ssc$K.adj){
+    adj = adj * (n - 1) / (n - K)
+  }
+  
+  if(adj != 1){
+    vcov_mat = vcov_mat * adj
   }
 
   attr(vcov_mat, "G") = n_time
@@ -2215,13 +2223,18 @@ vcov_driscoll_kraay_internal = function(bread, scores, vars, ssc, n, K,
     vcov_mat = meat
   }
   
-  # ssc must be provided excplicitly by the user
-  # default: K.adj = FALSE
-  if(!isTRUE(attr(ssc, "default_ssc"))){
-    if(ssc$K.adj){
-      adj = n / (n - K)
-      vcov_mat = vcov_mat * adj
-    }
+  # adjustment
+  adj = 1
+  if(ssc$G.adj){
+    adj = n_time / (n_time - 1)
+  }
+  
+  if(ssc$K.adj){
+    adj = adj * (n - 1) / (n - K)
+  }
+  
+  if(adj != 1){
+    vcov_mat = vcov_mat * adj
   }
 
   attr(vcov_mat, "G") = n_time
@@ -2326,13 +2339,9 @@ vcov_conley_internal = function(bread, scores, vars, ssc, n, K, sandwich, nthrea
     vcov_mat = meat
   }
   
-  # ssc must be provided excplicitly by the user
-  # default: K.adj = FALSE
-  if(!isTRUE(attr(ssc, "default_ssc"))){
-    if(ssc$K.adj){
-      adj = n / (n - K)
-      vcov_mat = vcov_mat * adj
-    }
+  if(ssc$K.adj){
+    adj = n / (n - K)
+    vcov_mat = vcov_mat * adj
   }
 
   scale = if(metric == "km") 1 else 1 / 1.60934
@@ -2922,6 +2931,9 @@ setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
   all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
   all_vcov_names = c(all_vcov_names, "all")
   
+  # special case
+  vcov_names[vcov_names == ""] = "cluster"
+  
   check_set_arg(vcov_names, "multi match", .choices = all_vcov_names)
   
   if("all" %in% vcov_names){
@@ -2981,11 +2993,12 @@ setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
 getFixest_ssc = function(vcov_name = NULL){
   
   check_arg(vcov_name, "character scalar NULL")
+  # special case
+  if(vcov_name == "") vcov_name = "cluster"
 
   all_ssc = getOption("fixest_ssc", list())
   
   if(is.null(vcov_name)){
-    attr(all_ssc, "default_ssc") = TRUE
     return(all_ssc)
   }
   
