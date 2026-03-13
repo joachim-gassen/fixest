@@ -973,6 +973,8 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' the number of variables plus the number of fixed-effects. Finally, if `"nonnested"`, then 
 #' the number of parameters is equal to the number of variables plus the number of 
 #' fixed-effects that *are not* nested in the clusters used to cluster the standard-errors.
+#' 
+#' When the standard-errors are not clustered, `"nonnested"` is equivalent to `"full"`.
 #' @param K.exact Logical, default is `FALSE`. If there are 2 or more fixed-effects, 
 #' these fixed-effects can be irregular, meaning they can provide the same information. 
 #' If so, the "real" number of parameters should be lower than the total number of 
@@ -980,8 +982,9 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' determine the exact number of parameters among the fixed-effects. Mostly, panels of 
 #' the type individual-firm require `K.exact = TRUE` (but it adds computational costs).
 #' @param G.adj Logical scalar, default is `TRUE`. How to make the small sample correction 
-#' when clustering the standard-errors? If `TRUE` a `G/(G-1)` correction is performed with `G` 
-#' the number of cluster values.
+#' with cluster-like standard-errors? If `TRUE` a `G/(G-1)` correction is performed with `G` 
+#' the number of cluster values. In the case of Newey-West or Driscoll-Kraay, `G` is the number
+#' of time periods.
 #' @param G.df Either "conventional" or "min" (default). Only relevant when the 
 #' variance-covariance matrix is two-way clustered (or higher). It governs how the small 
 #' sample adjustment for the clusters is to be performed. \[Sorry for the jargon that follows.\] 
@@ -989,12 +992,15 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' smallest G_i. If `G.df="conventional"` then the i-th "sandwich" matrix is adjusted 
 #' with G_i/(G_i-1) with G_i the number of unique clusters.
 #' @param t.df Either "conventional", "min" (default) or an integer scalar. Only relevant when 
-#' the variance-covariance matrix is clustered. It governs how the p-values should be computed. 
+#' the variance-covariance matrix is cluster-like. It governs how the p-values should be computed. 
 #' By default, the degrees of freedom of the Student t distribution is equal to the minimum size 
 #' of the clusters with which the VCOV has been clustered minus one. If `t.df="conventional"`, 
 #' then the degrees of freedom of the Student t distribution is equal to the number of 
 #' observations minus the number of estimated variables. You can also pass a number to 
 #' manually specify the DoF of the t-distribution.
+#' 
+#' In the case of Newey-West or Driscoll-Kraay, when `t.df="min"`, this leads to using
+#' the number of time periods minus one for the degrees of freedom of the t distribution.
 #' @param ... Only used internally (to catch deprecated parameters).
 #'
 #' @details
@@ -1139,14 +1145,29 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 #' @inheritParams hatvalues.fixest
 #'
 #' @param x A `fixest` object.
-#' @param type A string scalar. Either "HC1"/"HC2"/"HC3"
+#' @param type A string scalar equal to "HC1" (default), "HC2" or "HC3". 
+#' Note that the case is ignored.
 #' @param ssc An object returned by the function [`ssc`]. It specifies how to perform the small 
-#' sample correction.
+#' sample correction. Note that this argument is only used in `"HC1"` which accepts 
+#' ssc arguments starting with `"K"`. In that case when `ssc(K.adj = FALSE)`, 
+#' it leads to "HC0". The argument `ssc` is ignored for `HC2` and `HC2` VCOVs.
 #'
+#' @section Small sample correction:
+#' A custom small sample correction can be applied to the HC1 VCOV using the [`ssc`] argument 
+#' and function. By default an adjustment of N/(N-K) is applied to the VCOV, with N the number of
+#' observations and K the number of parameters. If `ssc(K.adj = FALSE)`, meaning that there is 
+#' no adjustment, this leads to the HC0 VCOV. Finally ssc's arguemnts
+#' K.fixef and K.exact determine how to account for the parameters associated to the fixed-effects 
+#' (if the estimation contains fixed-effects).
+#' 
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
 #'
-#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted to the left (i.e. `vcov_hetero("HC3")` is equivalent to `vcov_hetero(type = "HC3")` and b) a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] or even in the estimation calls).
+#' If the first argument is not a `fixest` object, then a) implicitly the arguments are shifted
+#'  to the left (i.e. `vcov_hetero("HC3")` is equivalent to `vcov_hetero(type = "HC3")` and b) 
+#' a VCOV-*request* is returned and NOT a VCOV. That VCOV-request can then 
+#' be used in the argument `vcov` of various `fixest` functions (e.g. [`vcov.fixest`] 
+#' or even in the estimation calls).
 #'
 #' @author
 #' Laurent Berge and Kyle Butts
@@ -1162,8 +1183,9 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 #' est = feols(y ~ x1 | species, base)
 #'
 #' vcov_hetero(est, "hc1")
-#' vcov_hetero(est, "hc2", ssc = ssc(K.adj = FALSE))
-#' vcov_hetero(est, "hc3", ssc = ssc(K.adj = FALSE))
+#' vcov_hetero(est, "hc1", ssc = ssc(K.adj = FALSE))
+#' vcov_hetero(est, "hc2")
+#' vcov_hetero(est, "hc3")
 #'
 #' # Using approximate hatvalues
 #' vcov_hetero(est, "hc3", exact = FALSE, boot.size = 500)
@@ -1214,7 +1236,7 @@ vcov_hetero = function(x, type = "hc1", exact = TRUE, boot.size = NULL,
 #' values of the clusters. Note that in cases i) and ii) the variables are fetched directly in the 
 #' data set used for the estimation.
 #' @param ssc An object returned by the function [`ssc`]. It specifies how to perform the small 
-#' sample correction.
+#' sample correction. These VCOVs accept all the arguments of [`ssc`].
 #'
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
@@ -1387,6 +1409,31 @@ vcov_cluster = function(x, cluster = NULL, ssc = NULL, vcov_fix = TRUE){
 #' `n_t^0.25` with `n_t` the number of time periods (as of Newey and West 1987) for panel 
 #' Newey-West and Driscoll-Kraay. The default for the time series Newey-West is computed via 
 #' [`bwNeweyWest`][sandwich::NeweyWest] which implements the Newey and West 1994 method.
+#' @param ssc An object of class `ssc_type` obtained with the function [`ssc`]. 
+#' It specifies how to perform the small sample correction. See details.
+#' 
+#' By default the VCOV is multiplied by (N - 1) / (N - K) * T / (T - 1), with N the number of 
+#' observations, K the number of parameters and T the number of time periods. 
+#' To remove the (N - 1) / (N - K) adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' To remove the T / (T - 1) adjustment, use `ssc=ssc(G.adj = FALSE)`.
+#' To remove both, use `ssc=ssc(K.adj = FALSE, G.adj = FALSE)`.
+#' 
+#' 
+#' @section Small sample correction:
+#' By default, for the Newey-West and the Driscoll-Kraay VCOVs, the VCOV is multiplied 
+#' by (N - 1) / (N - K) * T / (T - 1), with N the number of observations, K the number of
+#' parameters and T the number of time periods. 
+#' 
+#' You can modify these adjustments with the argument `ssc`.
+#' To remove the (N - 1) / (N - K) adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' To remove the T / (T - 1) adjustment, use `ssc=ssc(G.adj = FALSE)`.
+#' To remove both, use `ssc=ssc(K.adj = FALSE, G.adj = FALSE)`.
+#' 
+#' If the estimation contains fixed effects, you can modify how the number of parameters is computed
+#' with the arguments `K.fixef` and `K.exact` (see [`ssc`] for details).
+#' 
+#' To compute the pvalue, the degrees of freedom of the t-stat is the number of time periods 
+#' if `ssc=ssc(t.df = "min")` (default). To use N - K instead use `ssc=ssc(t.df="conventional")`.
 #'
 #' @section Lag selection:
 #'
@@ -1584,6 +1631,20 @@ vcov_NW = function(x, unit = NULL, time = NULL, lag = NULL, ssc = NULL, vcov_fix
 #' @param distance How to compute the distance between points. It can be equal to "triangular" 
 #' (default) or "spherical". The latter case corresponds to the great circle distance and is more 
 #' precise than triangular but is a bit more intensive computationally.
+#' @param ssc An object of class `ssc_type` obtained with the function [`ssc`]. 
+#' It specifies how to perform the small sample correction. 
+#' 
+#' By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of 
+#' observations and K the number of parameters. 
+#' To remove this adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' 
+#' @section Small sample correction:
+#' By default the VCOV is multiplied by (N - 1) / (N - K) with N the number of 
+#' observations and K the number of parameters. 
+#' To remove this adjustment, use `ssc=ssc(K.adj = FALSE)`.
+#' 
+#' If the estimation contains fixed effects, you can modify how the number of parameters is computed
+#' with the arguments `K.fixef` and `K.exact` (see [`ssc`] for details).
 #'
 #' @return
 #' If the first argument is a `fixest` object, then a VCOV is returned (i.e. a symmetric matrix).
