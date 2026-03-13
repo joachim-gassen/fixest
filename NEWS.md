@@ -41,17 +41,9 @@
 
 ## Small sample correction
 
-- the way the small sample correction works has been slightly modified
+- the way the small sample correction (SSC) works has been slightly modified
 
-- the argument `ssc` remains unchanged for the IID and clustered standard-errors, and its default can still be set globaly with `setFixest_ssc()`
-
-- for all other VCOVs (i.e. Heteroskedastic, Newey-West, Driscoll-Kraay, Conley):
-  - the user always need to provide the argument `ssc` explicitly and cannot rely on the global default any more
-  - only the argument `K.adj` is valid and its default is `TRUE` for hetero VCOVs (corresponds to HC1) and `FALSE` for Newey-West, Driscoll-Kraay and Conley
-  - the adjustment, for non IID, non clustered VCOVs, becomes `n/(n-K)`
-  - for Newey-West and Driscoll-Kraay there was another minor adjustment linked to `G.adj` => this one is dropped entirely
-
-- consequences: users using Newey-West, Driscoll-Kraay or Conley VCOVs may have slightly smaller standard-errors following this update. To get to the previous 
+- you can now set the SSC globally for each VCOV individually with `setFixest_ssc(ssc_type, vcov_names)` (before it was the same SSC for any VCOV)
 
 ## Other changes
 

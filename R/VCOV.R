@@ -749,7 +749,7 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 
   # ssc related => we accept NULL
   # we check ssc since it can be used by the funs
-  if(missnull(ssc)) ssc = getFixest_ssc()
+  if(missnull(ssc)) ssc = getFixest_ssc(vcov_name)
   check_arg(ssc, "class(ssc_type)", 
             .message = "The argument 'ssc' must be an object created by the function ssc().")
 
@@ -1106,11 +1106,10 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
   check_set_arg(K.adj, "loose logical scalar conv")
   check_set_arg(K.fixef, "match(none, full, all, nonnested, nested)", 
                 .message = "The argument `K.fixef` must be equal to either: i) none, ii) full, or iii) nonnested. Partial matching applies.")
+  
   if(identical(K.fixef, "all")){
     K.fixef = "full"
-  }
-  
-  if(identical(K.fixef, "nested")){
+  } else if(identical(K.fixef, "nested")){
     K.fixef = "nonnested"
   }
   
@@ -1120,6 +1119,7 @@ ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
 
   res = list(K.adj = K.adj, K.fixef = K.fixef, G.adj = G.adj, G.df = G.df,
              t.df = t.df, K.exact = K.exact)
+  
   class(res) = "ssc_type"
 
   res
@@ -1701,6 +1701,7 @@ vcov_setup = function(){
   vcov_iid_setup = list(name = c("iid", "normal", "standard"), 
                         fun_name = "vcov_iid_internal", 
                         ssc_allow_nonnested = TRUE,
+                        ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
                         ssc_available = ssc_available(K = TRUE),
                         vcov_label = "IID")
 
@@ -1710,6 +1711,7 @@ vcov_setup = function(){
 
   vcov_hetero_setup = list(name = c("hetero", "white", "hc1"), 
                            fun_name = "vcov_hetero_internal", 
+                           ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
                            ssc_available = ssc_available(K = TRUE),
                            vcov_label = "Heteroskedasticity-robust")
   
@@ -1789,7 +1791,7 @@ vcov_setup = function(){
 
   vcov_newey_west_setup = list(name = c("NW", "newey_west"),
                                fun_name = "vcov_newey_west_internal",
-                               ssc_default = ssc(K.adj = FALSE),
+                               ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
                                ssc_available = ssc_available(K = TRUE),
                                vcov_label = "Newey-West")
 
@@ -1805,7 +1807,7 @@ vcov_setup = function(){
 
   vcov_driscoll_kraay_setup = list(name = c("DK", "driscoll_kraay"),
                                    fun_name = "vcov_driscoll_kraay_internal",
-                                   ssc_default = ssc(K.adj = FALSE),
+                                   ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
                                    ssc_available = ssc_available(K = TRUE),
                                    vcov_label = "Driscoll-Kraay")
 
@@ -1832,7 +1834,7 @@ vcov_setup = function(){
 
   vcov_conley_setup = list(name = "conley", 
                            fun_name = "vcov_conley_internal", 
-                           ssc_default = ssc(K.adj = FALSE),
+                           ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
                            ssc_available = ssc_available(K = TRUE),
                            vcov_label = "Conley")
   vcov_conley_setup$vars = list(lat = lat, lng = lng)
@@ -1847,7 +1849,7 @@ vcov_setup = function(){
 
   vcov_conley_hac_setup = list(name = c("conley_hac", "hac_conley"), 
                                fun_name = "vcov_conley_hac_internal", 
-                               ssc_default = ssc(K.adj = FALSE),
+                               ssc_default = ssc(K.adj = TRUE, K.fixef = "full"),
                                ssc_available = ssc_available(K = TRUE),
                                vcov_label = "Conley-HAC")
   # The variables (already defined earlier)
@@ -2859,35 +2861,85 @@ print.ssc_type = function(x, ...){
 }
 
 
-#' @rdname ssc
+#' Sets the default values for the small sample correction
+#' 
+#' Sets the default values for the Small Sample Correction (SSC) for specific `fixest` VCOVs
 #'
-#' @param ssc_type An object of class `ssc_type` obtained with the function [`ssc`].
-setFixest_ssc = function(ssc_type = ssc(), vcov_name = c("iid", "cluster")){
+#' @param ssc_type Either `NULL` (default), or an object of class `ssc_type` obtained 
+#' with the function [`ssc`], or old options values (of class `setFixest_ssc`). 
+#' By default, if `NULL`, it resets the SSC to their default value for the selected VCOVs.
+#' Otherwise it sets the default SSC for the selected VCOVs to the value returned by 
+#' the function ssc().
+#' @param vcov_names Character vector corresponding to the keywords of the VCOVs for which
+#' to change the default SSC. By default it is equal to `"iid"`. Some common VCOV names are: 
+#' "iid", "hetero", "cluster", "twoway", "newey", "driscoll", "conley".
+#' 
+#' @return 
+#' This functions invisibly returns the list of old settings, a list of class `setFixest_ssc`.
+#' 
+#' @seealso 
+#' [`vcov.fixest`], [`ssc`], [`getFixest_ssc`]
+#' 
+#' @examples 
+#' 
+#' # Estimation with current default values for the small sample correction
+#' feols(Sepal.Length ~ Petal.Length + Petal.Width, iris)
+#' 
+#' # looking at the default SSC
+#' getFixest_ssc("iid")
+#' 
+#' # 1) setting new default (and saving the previous opts)
+#' old_opts = setFixest_ssc(ssc(K.adj = FALSE), "iid")
+#' # => the SEs/t-stat differ
+#' feols(Sepal.Length ~ Petal.Length + Petal.Width, iris)
+#' 
+#' getFixest_ssc("iid")
+#' 
+#' # 2) resetting to the old values
+#' setFixest_ssc(old_opts)
+#' getFixest_ssc("iid")
+#' 
+#' 
+setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
   
-  check_arg(vcov_name, "character vector no na len(1,)")
-
-  if(!inherits(ssc_type, "ssc_type")){
-    stop("The argument 'ssc' must be an object created by the function ssc().")
+  check_arg(vcov_names, "character vector no na len(1,)")
+  
+  check_arg(ssc_type, "NULL class(ssc_type, setFixest_ssc)", 
+            .message = "The argument 'ssc' must be an object created by the function ssc() or old options (obtained from setFixest_ssc()).")
+  
+  # the old values
+  old_opts = getOption("fixest_ssc", list())
+  class(old_opts) = "setFixest_ssc"
+  
+  if(inherits(ssc_type, "setFixest_ssc")){
+    options("fixest_ssc" = ssc_type)
+    return(invisible(old_opts))
   }
   
   # All valid VCOVs
   all_vcov = getOption("fixest_vcov_builtin")
   all_vcov_names = unlist(lapply(all_vcov, `[[`, "name"))
   all_vcov_names = all_vcov_names[nchar(all_vcov_names) > 0]
+  all_vcov_names = c(all_vcov_names, "all")
   
-  check_set_arg(vcov_name, "multi match", .choices = all_vcov_names)
+  check_set_arg(vcov_names, "multi match", .choices = all_vcov_names)
   
-  # the default values
-  all_ssc = getOption("fixest_ssc", list())
+  if("all" %in% vcov_names){
+    vcov_names = sapply(all_vcov, function(x) x$name[1])
+  }
   
-  for(vcov in vcov_name){
+  all_ssc = old_opts
+  
+  for(vcov in vcov_names){
     vcov_id = which(sapply(all_vcov, function(x) vcov %in% x$name))
     vcov_info = all_vcov[[vcov_id]]
     name = vcov_info$name[1]
     
     my_ssc = ssc_type
-    if(!is.null(vcov_info$ssc_available)){
-      attr(my_ssc, "available") = vcov_info$ssc_available
+    if(!is.null(ssc_type)){
+      if(!is.null(vcov_info$ssc_available)){
+        attr(my_ssc, "available") = vcov_info$ssc_available
+      }
     }
     
     attr(my_ssc, "vcov_label") = vcov_info$vcov_label
@@ -2896,6 +2948,7 @@ setFixest_ssc = function(ssc_type = ssc(), vcov_name = c("iid", "cluster")){
   }
 
   options("fixest_ssc" = all_ssc)
+  return(invisible(old_opts))
 }
 
 #' Gets the default values for the small sample correction
@@ -2913,6 +2966,9 @@ setFixest_ssc = function(ssc_type = ssc(), vcov_name = c("iid", "cluster")){
 #' it corresponds to the default small sample correction (SSC) for this VCOV.
 #' 
 #' If `NULL`, all the SSCs that have been set by the user with [`setFixest_ssc`] are returned.
+#' 
+#' @seealso 
+#' [`vcov.fixest`], [`ssc`], [`setFixest_ssc`]
 #' 
 #' @examples 
 #' 
