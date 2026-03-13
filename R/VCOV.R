@@ -3013,9 +3013,8 @@ setFixest_ssc = function(ssc_type = NULL, vcov_names = "iid"){
       if(!is.null(vcov_info$ssc_available)){
         attr(my_ssc, "available") = vcov_info$ssc_available
       }
+      attr(my_ssc, "vcov_label") = vcov_info$vcov_label
     }
-    
-    attr(my_ssc, "vcov_label") = vcov_info$vcov_label
     
     all_ssc[[name]] = my_ssc
   }
@@ -3055,7 +3054,7 @@ getFixest_ssc = function(vcov_name = NULL){
   
   check_arg(vcov_name, "character scalar NULL")
   # special case
-  if(vcov_name == "") vcov_name = "cluster"
+  if(!is.null(vcov_name) && vcov_name == "") vcov_name = "cluster"
 
   all_ssc = getOption("fixest_ssc", list())
   
