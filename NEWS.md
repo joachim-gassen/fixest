@@ -41,9 +41,9 @@
 
 ## Small sample correction
 
-- the way the small sample correction (SSC) works has been slightly modified
-
 - you can now set the SSC globally for each VCOV individually with `setFixest_ssc(ssc_type, vcov_names)` (before it was the same SSC for any VCOV)
+
+- the documentation for each VCOV now contains how the small sample correction is applied
 
 ## Other changes
 
