@@ -1207,8 +1207,14 @@ wald = function(x, keep = NULL, drop = NULL, print = TRUE, vcov, se, cluster, ..
   qui = names(x$coefficients) %in% coef_name
   my_coef = x$coefficients[qui]
   df1 = length(my_coef)
-
-  df2 = x$nobs - x$nparams
+  
+  df2 = attr(x$cov.scaled, "df.t")
+  if(is.null(df2)){
+    df2 = x$nobs - x$nparams
+  } else {
+    # normalisation => can happen with few clusters
+    df2 = max(df2, df1 + 1)
+  }
 
   # The VCOV is always full rank in here
   stat = drop(my_coef %*% invert_posdef_mat(x$cov.scaled[qui, qui]) %*% my_coef) / df1

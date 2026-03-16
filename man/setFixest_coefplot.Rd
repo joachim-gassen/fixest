@@ -75,10 +75,13 @@ entries in the global dictionary, to disable this behavior, use "reset" as the f
 \item{keep}{Character vector. This element is used to display only a subset of variables. This
 should be a vector of regular expressions (see \code{\link[base:regex]{base::regex}} help for more info). Each
 variable satisfying any of the regular expressions will be kept. This argument is applied post
-aliasing (see argument \code{dict}). Example: you have the variable \code{x1} to \code{x55} and want to display
+aliasing (see argument \code{dict}).
+Use the argument \code{keep_raw} for the same effect before aliasing.
+
+Example: you have the variable \code{x1} to \code{x55} and want to display
 only \code{x1} to \code{x9}, then you could use \code{keep = "x[[:digit:]]$"}. If the first character is an
-exclamation mark, the effect is reversed (e.g. keep = "!Intercept" means: every variable that
-does not contain \dQuote{Intercept} is kept). See details.}
+exclamation mark, the effect is reversed (e.g. keep = "!Constant" means: every variable that
+does not contain \dQuote{Constant} is kept). See details.}
 
 \item{ci.width}{The width of the extremities of the confidence intervals. Default is \code{0.1}.}
 

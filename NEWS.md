@@ -75,6 +75,8 @@
 
 - improve the startup message: i) remove false positives, ii) write the previous fixest version in the message, making it clearer which modifications the update entails
 
+- `wald()` now uses the effective sample size to compute the pvalue (it matters for clustered standard-errors with few clusters). Thanks to @Oravishayrizi, #634
+
 ## Internals
 
 - OpenMP multithreading should now work out-of-the-box for CRAN Mac binary installations; please confirm with `getFixest_nthreads()`. Previously, Mac users had to configure their `~/.R/Makevars` and install `fixest` from source to get multithreaded performance. Thanks to the `data.table` team for pioneering the configure script approach (#615).

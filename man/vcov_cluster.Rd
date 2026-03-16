@@ -15,7 +15,7 @@ values of the clusters. Note that in cases i) and ii) the variables are fetched 
 data set used for the estimation.}
 
 \item{ssc}{An object returned by the function \code{\link{ssc}}. It specifies how to perform the small
-sample correction.}
+sample correction. These VCOVs accept all the arguments of \code{\link{ssc}}.}
 
 \item{vcov_fix}{Logical scalar, default is \code{FALSE}. If the VCOV ends up not being
 positive definite, whether to "fix" it using an eigenvalue decomposition
