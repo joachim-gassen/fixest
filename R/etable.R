@@ -3506,7 +3506,7 @@ etable_internal_latex = function(info){
     tabular_end = "\\end{tabular*}\n"
   } else if(tabular == "X"){
 
-    all_cols = .dsb("l *.[n_models]{>{\\centering\\arraybackslash}X}")
+    all_cols = .dsb("l *{.[n_models]}{>{\\centering\\arraybackslash}X}")
 
     tabular_begin = paste0("\\begin{tabularx}{\\textwidth}{",
                            space, all_cols, space, "}\n", style$line.top)

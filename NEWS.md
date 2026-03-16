@@ -21,9 +21,11 @@
 
 - fix bug in the predict method when applied to split sample estimations with fixed-effects with some fixed-effects which were removed. Thanks to @francescodelprato for reporting (#620).
 
-- etable: fix bug removing whitespaces in variable names (reported by @etiennebacher, #608)
+- `etable`: fix bug removing whitespaces in variable names (reported by @etiennebacher, #608)
 
 - interaction between `panel()` and `data.table`: fix bug preventing the print of the table. Reported by @andrewbaxter439, #610.
+
+- `etable`: fix bug when the table contained 10+ columns in a tabularx environment. Thanks to @MaelAstruc, #637
 
 ## New features
 
