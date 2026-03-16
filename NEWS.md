@@ -3,9 +3,9 @@
 
 ## Bug fixes
 
-- vcov: fig bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postive definite. Reported by @MatthieuStigler.
+- vcov: fix bug in the message when `vcov_fix = FALSE` and the matrix is found to be non postive definite. Reported by @MatthieuStigler.
 
-- `etable`: fix bug when extralines or headers was single valued (fixes #399)
+- `etable`: fix bug when `extralines` or `headers` was single valued (fixes #399)
 
 - fix bug leading to R crach when the dependent variable contained only missing values (reported by @Orgron, #603)
 
@@ -13,7 +13,7 @@
 
 - improve detection of R-checks to avoid wrongly setting the number of cores to 1. Thanks to @adamaltmejd for reporting, fixes #625.
 
-- fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the intruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by @willwwang, #604
+- fix major bug, leading R to crash, when i) an endogenous regressor is fully explained by the instruments + exogenous variables, or ii) the instruments have exactly 0 explanatory power. Reported by @willwwang, #604
 
 - remove unwanted warnings when using VCOV HC2/HC3
 
@@ -55,7 +55,7 @@
 
 - the `stats` method `logLik.fixest` now resembles `logLik.lm`
 
-- add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate -- thanks to a referee and to GMD for the idea!
+- add `plot` method that mimics `coefplot`/`iplot` with auto switch when appropriate -- thanks to an editor and to GMD for the idea!
 
 - improve the display of the error messages in the main estimations
 
