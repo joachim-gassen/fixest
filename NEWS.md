@@ -73,6 +73,10 @@
 
 - improve the startup message: i) remove false positives, ii) write the previous fixest version in the message, making it clearer which modifications the update entails
 
+## Internals
+
+- OpenMP multithreading should now work out-of-the-box for CRAN Mac binary installations; please confirm with `getFixest_nthreads()`. Previously, Mac users had to configure their `~/.R/Makevars` and install `fixest` from source to get multithreaded performance. Thanks to the `data.table` team for pioneering the configure script approach (#615).
+
 # fixest 0.13.2
 
 ## Bug fixes
