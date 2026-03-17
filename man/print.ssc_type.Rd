@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{An object of class \code{ssc_type}, obtained from the function \code{\link{ssc}}.}
+
+\item{...}{Not currently used.}
 }
 \value{
 This function does not return anything.

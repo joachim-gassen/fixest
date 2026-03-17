@@ -148,11 +148,11 @@ attr(fixef(est), "references")
 # To permanently set the default ssc:
 #
 
-# eg no small sample adjustment:
-setFixest_ssc(ssc(K.adj = FALSE))
+# eg no small sample adjustment for iid VCOV:
+setFixest_ssc(ssc(K.adj = FALSE), "iid")
 
-# Factory default
-setFixest_ssc()
+# Restoring the default for all vcovs
+setFixest_ssc(vcov_names = "all")
 
 }
 \seealso{

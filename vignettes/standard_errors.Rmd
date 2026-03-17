@@ -30,7 +30,7 @@ Multiple definitions can create confusion and the purpose of this document is to
 
 The first part of this vignette describes how standard-errors are computed in `fixest`'s estimations. In particular, it details all the possible choices surrounding small sample correction. Please note that here I don't discuss the *why*, but only the *how*. For a thorough introduction to the topic, see the excellent paper by [Zeileis, Koll and Graham (2020)](https://cran.r-project.org/package=sandwich/vignettes/sandwich-CL.pdf). The second part illustrates how to replicate some standard-errors obtained from other estimation methods with `fixest`. 
 
-This document applies to `fixest` version 0.10.0 or higher.
+This document applies to `fixest` version 0.14.0 or higher.
 
 
 ## How standard-errors are computed in `fixest`
@@ -325,10 +325,10 @@ As we can see, there is only slight differences with `lfe` when computing cluste
 
 Once you've found the preferred way to compute the standard-errors for your current project, you can set it permanently using the functions `setFixest_ssc()` and `setFixest_vcov()`.
 
-For example, if you want to remove the small sample adjustment, just use:
+For example, if you want to remove the small sample adjustment for the clustered standard-errors, use:
 
 ```{r}
-setFixest_ssc(ssc(K.adj = FALSE))
+setFixest_ssc(ssc(K.adj = FALSE), "cluster")
 ```
 
 By default, the standard-errors are the standard ones (IID). You can change this behavior with, e.g.:
@@ -341,6 +341,10 @@ setFixest_vcov(no_FE = "iid", one_FE = "cluster",
 which changes the way the default standard-errors are computed when the estimation contains no fixed-effects, one fixed-effect, two or more fixed-effects, or is a panel.
 
 ## Changelog
+ 
+ - Version 0.14.0:
+ 
+   * The function `setFixest_ssc` becomes VCOV specific (before it was applied to all VCOVS). You can pass the names of the VCOVs to which it should apply using its second argument `vcov_names`.
 
  - Version 0.13.0:
  

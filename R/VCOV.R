@@ -1094,11 +1094,11 @@ vcov.fixest = function(object, vcov = NULL, se = NULL, cluster, ssc = NULL, attr
 #' # To permanently set the default ssc:
 #' #
 #'
-#' # eg no small sample adjustment:
-#' setFixest_ssc(ssc(K.adj = FALSE))
+#' # eg no small sample adjustment for iid VCOV:
+#' setFixest_ssc(ssc(K.adj = FALSE), "iid")
 #'
-#' # Factory default
-#' setFixest_ssc()
+#' # Restoring the default for all vcovs
+#' setFixest_ssc(vcov_names = "all")
 #'
 ssc = function(K.adj = TRUE, K.fixef = "nonnested", K.exact = FALSE,
                G.adj = TRUE, G.df = "min", t.df = "min", ...){
@@ -2873,6 +2873,7 @@ is_function_in_it = function(x){
 #' Pretty print for the small sample correction obtained from [`ssc`]
 #' 
 #' @param x An object of class `ssc_type`, obtained from the function [`ssc`].
+#' @param ... Not currently used.
 #' 
 #' @return 
 #' This function does not return anything.
