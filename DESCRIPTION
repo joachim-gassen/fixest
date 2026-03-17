@@ -28,7 +28,7 @@ Suggests: knitr, rmarkdown, data.table, plm, MASS, pander, ggplot2, lfe, tinytex
 LinkingTo: Rcpp
 Depends: R(>= 3.5.0)
 Description: Fast and user-friendly estimation of econometric models with multiple fixed-effects. Includes ordinary least squares (OLS), instrumental variables (IV), generalized linear models (GLM), maximum likelihood estimation (ML), and the negative binomial.
-    The core of the package is based on optimized parallel C++ code, scaling especially well for large data sets. The method to obtain the fixed-effects coefficients is based on Bergé, Butts, McDermott (2026) <https://arxiv.org/abs/2601.21749>.
+    The core of the package is based on optimized parallel C++ code, scaling especially well for large data sets. The method to obtain the fixed-effects coefficients is based on Bergé, Butts, McDermott (2026) <doi:10.48550/arXiv.2601.21749>.
     Further provides tools to export and view the results of several estimations with intuitive design to change the standard-errors.
 License: GPL-3
 BugReports: https://github.com/lrberge/fixest/issues
