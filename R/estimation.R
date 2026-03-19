@@ -2199,7 +2199,10 @@ ols_fit = function(y, X, w, correct_0w = FALSE, collin.tol, nthreads, xwx = NULL
   
   if(!is.null(info_inv$all_removed)){
     # Means all variables are collinear! => can happen when using FEs
-    return(list(all_removed = TRUE))
+    # if no regressor: resid = y
+    # (=> this info is useful in IVs)
+    
+    return(list(all_removed = TRUE, residuals = y))
   }
 
   xwx_inv = info_inv$XtX_inv

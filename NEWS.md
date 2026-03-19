@@ -1,4 +1,10 @@
 
+# fixest 0.14.1
+
+## Bug fixes
+
+- fix bug in IV estimation when all exogenous regressors are removed from the estimation in the presence of fixed-effects. Reported by @adamaltmejd, #638
+
 # fixest 0.14.0
 
 ## Bug fixes
