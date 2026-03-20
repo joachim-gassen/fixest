@@ -5,6 +5,10 @@
 
 - fix bug in IV estimation when all exogenous regressors are removed from the estimation in the presence of fixed-effects. Reported by @adamaltmejd, #638
 
+## Other changes
+
+- improve the print method for TSLS
+
 # fixest 0.14.0
 
 ## Bug fixes
