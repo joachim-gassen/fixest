@@ -1,17 +1,13 @@
 
-# fixest 0.14.2
-
-# Bug fixess
-
-- fix various typos in the documentation
-
-- fix bug in the error reporting for `femlm`/`fenegbin`/`fepois`. Thanks to @RobinDenz1 for reporting (fixes #646).
-
 # fixest 0.14.1
 
 ## Bug fixes
 
 - fix bug in IV estimation when all exogenous regressors are removed from the estimation in the presence of fixed-effects. Reported by @adamaltmejd, #638
+
+- fix various typos in the documentation
+
+- fix bug in the error reporting for `femlm`/`fenegbin`/`fepois`. Thanks to @RobinDenz1 for reporting (fixes #646).
 
 ## Other changes
 
