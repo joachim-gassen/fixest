@@ -1986,9 +1986,9 @@ nobs.fixest = function(object, ...){
   object$nobs
 }
 
-#' Aikake's an information criterion
+#' Akaike's an information criterion
 #'
-#' This function computes the AIC (Aikake's, an information criterion) from a `fixest` estimation.
+#' This function computes the AIC (Akaike's, an information criterion) from a `fixest` estimation.
 #'
 #' @inheritParams nobs.fixest
 #'
@@ -2004,11 +2004,11 @@ nobs.fixest = function(object, ...){
 #' You can have more information on this criterion on [`AIC`][stats::AIC].
 #'
 #' @return
-#' It return a numeric vector, with length the same as the number of objects taken as arguments.
+#' It returns a numeric vector, with length the same as the number of objects taken as arguments.
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. 
-#' Other statictics methods: [`BIC.fixest`], [`logLik.fixest`], [`nobs.fixest`].
+#' Other statistics methods: [`BIC.fixest`], [`logLik.fixest`], [`nobs.fixest`].
 #'
 #' @author
 #' Laurent Berge
@@ -2062,7 +2062,7 @@ AIC.fixest = function(object, ..., k = 2){
 #' You can have more information on this criterion on [`AIC`][stats::AIC].
 #'
 #' @return
-#' It return a numeric vector, with length the same as the number of objects taken as arguments.
+#' It returns a numeric vector, with length the same as the number of objects taken as arguments.
 #'
 #' @seealso
 #' See also the main estimation functions [`femlm`], [`feols`] or [`feglm`]. Other statistics functions: [`AIC.fixest`], [`logLik.fixest`].

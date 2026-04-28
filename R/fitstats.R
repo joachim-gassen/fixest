@@ -562,9 +562,6 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' # Now we can use these keywords in fitstat:
 #' etable(gravity, fitstat = ~ . + tstand + thc + t1w + t2w)
 #'
-#' # Note that the custom stats we created are can easily lead
-#' # to errors, but that's another story!
-#'
 #'
 fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL, 
                    simplify = FALSE, verbose = TRUE, show_types = FALSE,
