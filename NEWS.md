@@ -5,7 +5,7 @@
 
 - fix various typos in the documentation
 
-- 
+- fix bug in the error reporting for `femlm`/`fenegbin`/`fepois`. Thanks to @RobinDenz1 for reporting (fixes #646).
 
 # fixest 0.14.1
 

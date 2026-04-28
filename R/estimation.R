@@ -2599,7 +2599,7 @@ feglm = function(fml, data, family = "gaussian", vcov, offset, weights, subset, 
                          panel.id = panel.id, panel.time.step = panel.time.step,
                          panel.duplicate.method = panel.duplicate.method, 
                          linear.start = start,
-                         etastart=etastart, mustart = mustart, fixef = fixef,
+                         etastart = etastart, mustart = mustart, fixef = fixef,
                          fixef.rm = fixef.rm, fixef.tol = fixef.tol,
                          fixef.iter = fixef.iter, fixef.algo = fixef.algo,
                          collin.tol = collin.tol,
@@ -3655,7 +3655,7 @@ femlm = function(fml, data, family = c("poisson", "negbin", "logit", "gaussian")
                    env = env, ...), silent = TRUE)
 
   if(inherits(res, "try-error")){
-    err_msg = format_error_msg(env, "femlm")
+    err_msg = format_error_msg(res, "femlm")
     stopi("{err_msg}")
   }
 
@@ -3697,7 +3697,7 @@ fenegbin = function(fml, data, vcov, theta.init, start = 0, fixef, fixef.rm = "p
                    call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
   if(inherits(res, "try-error")){
-    err_msg = format_error_msg(env, "fenegbin")
+    err_msg = format_error_msg(res, "fenegbin")
     stopi("{err_msg}")
   }
 
@@ -3743,7 +3743,7 @@ fepois = function(fml, data, vcov, offset, weights, subset, split, fsplit,
                   call_env_bis = call_env_bis, env = env, ...), silent = TRUE)
 
   if(inherits(res, "try-error")){
-    err_msg = format_error_msg(env, "fepois")
+    err_msg = format_error_msg(res, "fepois")
     stopi("{err_msg}")
   }
 
