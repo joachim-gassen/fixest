@@ -605,6 +605,9 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #' # Some fit statistics
 #' fitstat(gravity, ~ rmse + r2 + wald + wf)
+#' 
+#' # This is a simple list:
+#' names(fitstat(gravity, ~ rmse + r2 + wald + wf))
 #'
 #' # You can use them in etable
 #' etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
@@ -1015,9 +1018,9 @@ fitstat = function(x, type, vcov = NULL, cluster = NULL, ssc = NULL,
         # if FE => on the projected model only
         
         if("fixef_id" %in% names(x)){
-          alternative = "At least one coefficient is different from 0"
-        } else {
           alternative = "At least one non fixed-effect coefficient is different from 0"
+        } else {
+          alternative = "At least one coefficient is different from 0"
         }
 
         qui = !names(x$coefficients) %in% "(Intercept)"

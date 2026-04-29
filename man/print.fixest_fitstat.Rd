@@ -28,6 +28,9 @@ fitstat(gravity, "g", simplify = TRUE)
 # Some fit statistics
 fitstat(gravity, ~ rmse + r2 + wald + wf)
 
+# This is a simple list:
+names(fitstat(gravity, ~ rmse + r2 + wald + wf))
+
 # You can use them in etable
 etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
 
