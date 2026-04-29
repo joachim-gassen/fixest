@@ -34,6 +34,9 @@ etable(gravity, fitstat = ~ rmse + r2 + wald + wf)
 # For wald and wf, you could show the pvalue instead:
 etable(gravity, fitstat = ~ rmse + r2 + wald.p + wf.p)
 
+# You can display the tests with the htest format with htest=TRUE
+fitstat(gravity, ~ rmse + r2 + wald + wf, htest = TRUE)
+
 # Now let's display some statistics that are not built-in
 # => we use fitstat_register to create them
 

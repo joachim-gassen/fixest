@@ -9,9 +9,15 @@
 
 - fix bug in the error reporting for `femlm`/`fenegbin`/`fepois`. Thanks to @RobinDenz1 for reporting (fixes #646).
 
+## New features
+
+- `fitstat` gains the argument `htest` which formats the tests according to the htest class from the `stats` package
+
 ## Other changes
 
 - improve the print method for TSLS
+
+- the documentation of `fitstat` is improved
 
 # fixest 0.14.0
 
