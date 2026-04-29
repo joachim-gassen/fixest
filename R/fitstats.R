@@ -436,30 +436,46 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 
 #' Computes fit statistics of fixest objects
 #'
-#' Computes various fit statistics for `fixest` estimations.
+#' Computes various fit statistics or hypothesis tests for `fixest` estimations. 
+#' These statistics can also be used within [`etable`] or set to be displayed when printing the 
+#' model with [`setFixest_print`].
 #' 
 #' @inheritParams summary.fixest
 #'
-#' @param x A `fixest` estimation.
-#' @param type Character vector or one sided formula. The type of fit statistic to be computed. 
-#' The classic ones are: n, rmse, r2, pr2, f, wald, ivf, ivwald. You have the full list in 
-#' the details section or use `show_types = TRUE`. Further, you can register your own types 
-#' with [`fitstat_register`].
+#' @param x A `fixest` estimation, obtained for example from [`feols`].
+#' @param type Character vector or one sided formula. No default. 
+#' The type of fit statistic to be computed. 
+#' The classic ones are: `n`, `rmse`, `r2`, `pr2`, `f`, `wald`, `ivf`, `ivwald`. 
+#' You have the full list in the details section or use `show_types = TRUE`. 
+#' Further, you can register your own types with [`fitstat_register`].
 #' @param simplify Logical, default is `FALSE`. By default a list is returned whose names are 
 #' the selected types. If `simplify = TRUE` and only one type is selected, then the element 
-#' is directly returned (ie will not be nested in a list).
+#' is directly returned (i.e. will not be nested in a list).
 #' @param verbose Logical, default is `TRUE`. If `TRUE`, an object of class `fixest_fitstat` 
 #' is returned (so its associated print method will be triggered). If `FALSE` a simple list 
-#' is returned instead.
-#' @param show_types Logical, default is `FALSE`. If `TRUE`, only prompts all available types.
+#' is returned instead (i.e. the same object without the class).
+#' @param show_types Logical, default is `FALSE`. If `TRUE`, this prompts all available types
+#' and nothing is returned.
 #' @param frame An environment in which to evaluate variables, default is `parent.frame()`. 
 #' Only used if the argument `type` is a formula and some values in the formula have to be 
 #' extended with the dot square bracket operator. Mostly for internal use.
 #' @param ... For internal use.
+#' 
+#' @details 
+#' 
+#' Any statistic available in `fitstat` can also be used directly in [`etable`] via its 
+#' argument `fitstat`. For example `etable(est, fitstat = c("r2", "rmse"))` will report 
+#' the R2 and the RMSE in the fit statistics section of the table.
+#' 
+#' If one wants to change the default set of statistics reported when printing the model,
+#' this is possible with the function [`setFixest_print`] which accepts the argument `fitstat`.
+#' For example `setFixest_print(fitstat = ~r2 + f)` will report the R2 and the F-test 
+#' for each estimation.
 #'
 #' @section Registering your own types:
 #'
-#' You can register custom fit statistics with the function `fitstat_register`.
+#' You can register custom fit statistics with the function [`fitstat_register`]. 
+#' These statistics can be anything. Please see its documentation.
 #'
 #' @section Available types:
 #'
@@ -528,25 +544,31 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #' @return
 #' By default an object of class `fixest_fitstat` is returned. This object is a simple list 
-#' containing the fit statistics requested by the user. For example `fitstat(x, c("r2", "f"))`
+#' containing the statistics/tests requested by the user. For example `fitstat(x, c("r2", "f"))`
 #' returns a list with two elements named `r2` and `f`.
 #' 
-#' Each element of the `fixest_fitstat` object is a fit statistic, which can be of two types:
+#' Each statistic from the `fixest_fitstat` object can be of two types:
 #' \enumerate{
-#' \item a list of numeric scalars associated to a fit statistic, the elements 
-#' depend on the type of fit statistic. For example the F-test, accessed with `f`, contains 
-#' the elements `stat`, `p`, `df1`, and `df2`. The `wald` test contains the elements 
-#' `stat`, `p`, `df1`, `df2` and `vcov`.
+#' \item a list of numeric scalars whose elements depend on the type of fit statistic/test. 
+#' For example the F-test, accessed with `f`, contains the elements 
+#' `stat`, `p`, `df1`, and `df2`. The `wald` test contains the elements 
+#' `stat`, `p`, `df1`, `df2` and `vcov`. The likelihood ratio, `lr`, contains the elements
+#' `stat`, `p`, `df`. Etc.
+#' 
 #' \item a numeric scalar, for either: i) scalar fit statistics, like `r2` or `rmse`, 
-#' ii) when a specific element of a fit statistic is accessed, like e.g. `f.stat`.
+#' ii) when a specific element of a fit statistic is accessed, like e.g. `f.stat` 
+#' which reports the `stat` element of the fit statistic `f`.
 #' }
 #' 
-#' The types of fit statistics, and hence their structure, are detailed 
-#' in the section `Available types`.
+#' The types of fit statistics and their structure are detailed 
+#' in the section `Available types` of this documentation.
 #' 
-#' Using `verbose = FALSE` 
-#' returns a simple a list. Finally, if only one type is selected, `simplify = TRUE` 
-#' leads to the selected type to be returned.
+#' Using `verbose = FALSE` removes the `fixest_fitstat` class from the returned object,
+#' turning it into a plain list.
+#' 
+#' If only one type is selected, `simplify = TRUE` leads to the selected statistic to 
+#' be directly returned (and hence is not nested inside a list). 
+#' For example `fitstat(x, "r2", simplify = TRUE)` returns a simple scalar.
 #'
 #' @examples
 #'
