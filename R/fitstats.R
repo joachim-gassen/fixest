@@ -484,7 +484,7 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #' will give the statistic of the F-test, or `wf.p` will give the p-values of the F-test 
 #' on the projected model (i.e. projected onto the fixed-effects).}
 #' \item{`wald`: }{Wald test of joint nullity of the coefficients. This test always excludes 
-#' the intercept and the fixed-effects. These type returns the following values: 
+#' the intercept and the fixed-effects. This type returns the following values: 
 #' `stat`, `p`, `df1`, `df2` and `vcov`. The element `vcov` reports the way the VCOV 
 #' matrix was computed since it directly influences this statistic.}
 #' \item{`ivf`, `ivf1`, `ivf2`, `ivfall`: }{These statistics are specific to IV estimations. 
@@ -527,7 +527,24 @@ fitstat_register = function(type, fun, alias = NULL, subtypes = NULL){
 #'
 #'
 #' @return
-#' By default an object of class `fixest_fitstat` is returned. Using `verbose = FALSE` 
+#' By default an object of class `fixest_fitstat` is returned. This object is a simple list 
+#' containing the fit statistics requested by the user. For example `fitstat(x, c("r2", "f"))`
+#' returns a list with two elements named `r2` and `f`.
+#' 
+#' Each element of the `fixest_fitstat` object is a fit statistic, which can be of two types:
+#' \enumerate{
+#' \item a list of numeric scalars associated to a fit statistic, the elements 
+#' depend on the type of fit statistic. For example the F-test, accessed with `f`, contains 
+#' the elements `stat`, `p`, `df1`, and `df2`. The `wald` test contains the elements 
+#' `stat`, `p`, `df1`, `df2` and `vcov`.
+#' \item a numeric scalar, for either: i) scalar fit statistics, like `r2` or `rmse`, 
+#' ii) when a specific element of a fit statistic is accessed, like e.g. `f.stat`.
+#' }
+#' 
+#' The types of fit statistics, and hence their structure, are detailed 
+#' in the section `Available types`.
+#' 
+#' Using `verbose = FALSE` 
 #' returns a simple a list. Finally, if only one type is selected, `simplify = TRUE` 
 #' leads to the selected type to be returned.
 #'
