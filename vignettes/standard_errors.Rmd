@@ -1,6 +1,6 @@
 ---
 title: "On standard-errors"
-author: "Laurent Berge"
+author: "Laurent Bergé"
 date: "`r Sys.Date()`"
 output: 
   html_document:
