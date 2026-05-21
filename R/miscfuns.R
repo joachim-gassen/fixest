@@ -2175,7 +2175,7 @@ xpd = function(fml, ..., add = NULL, lhs = NULL, rhs = NULL, add.after_pipe = NU
   }
 
   if(is_data){
-    var_to_complete = grep("[[:alnum:]]\\.\\.$", all.vars(fml), value = TRUE)
+    var_to_complete = grep("[[:alnum:]_]\\.\\.$", all.vars(fml), value = TRUE)
     n_var = length(var_to_complete)
     if(n_var > 0){
 
