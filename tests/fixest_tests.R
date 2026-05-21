@@ -1230,6 +1230,10 @@ test(any(grepl("HC3", est_tab$est_multi_HC3.2)), TRUE)
 est_multi_.vcov <- summary(est_multi, .vcov = vcovs_HC3)
 test(est_multi_.vcov[[1]]$se, est_multi_HC3[[1]]$se)
 
+# we check matrix operations work on vcovs => we only check for no error
+V = vcov(est)
+det(V)
+V %*% 1:3
 
 
 ####
