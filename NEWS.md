@@ -21,6 +21,8 @@
 
 ## Other changes
 
+- consolidate the two `etable` vignettes (`exporting_tables` and `etable_new_features`) into a single document. #648
+
 - improve the print method for TSLS
 
 - the documentation of `fitstat` is improved
