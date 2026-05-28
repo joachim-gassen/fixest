@@ -26,7 +26,7 @@ setFixest_etable(digits = 3)
 can_markdown = !nzchar(Sys.getenv("_R_CHECK_PACKAGE_NAME_", ""))
 ```
 
-Estimating fast regression models is all well and good. But really we want to share our results with the world. Alongside visualization, the canonical way to do this is via regression tables. While R offers a variety of tabling software, `fixest` provides its own dedicated tool---the function `etable`---for viewing estimation tables in `R` and exporting them to other formats like LaTeX. 
+Estimating regression models, however handy and fast, is but one part of the job. What we really care about is sharing our results with the world, right? Alongside visualization, the canonical way to do this is via regression tables. While R offers a variety of tabling software, `fixest` provides its own dedicated tool---the function `etable`---for viewing estimation tables in `R` and exporting them to other formats like LaTeX. 
 
 The main advantage of `etable` over other options is its native integration with the rest of the `fixest` ecosystem. This makes it exceedingly easy to, for example, export multiple estimation results with different types of standard-errors. It also offers a lot of leeway for customization. Once you decided on your preferred table aesthetic, you can even set default values to permanently transform the style without modifying a further line of code. 
 
@@ -217,7 +217,7 @@ etable(est, heavy = "0.14em", tex = TRUE)
 
 ### Highlighting coefficients
 
-Of course, LaTeX output gives you a lot more flexibility that printing to the console. A sharp example of this is the ability to highlighting coefficient, which especially useful for presentations. `etable` offers three ways to highlight coefficients:
+Of course, LaTeX output gives you a lot more flexibility than printing to the console. A sharp example of this is the ability to highlight coefficients, which is especially useful for presentations. `etable` offers three ways to highlight coefficients:
 
  - using a frame,
  - coloring the cells,
@@ -294,8 +294,8 @@ The `threeparttable` LaTeX package lets you attach notes that automatically matc
 
 ```{r, results = 'asis'}
 # First define notes in the dictionary
-setFixest_dict(c(note1 = dsb("*Notes*: This is a note that illustrates how to access notes ",
-                             "from the dictionary."),
+setFixest_dict(c(note1 = paste0("*Notes*: This is a note that illustrates how to access notes ",
+                                "from the dictionary."),
                  source = "*Sources*: Somewhere from the net."))
 
 etable(est, 
@@ -331,14 +331,6 @@ Let's have an example with a large table that would otherwise overflow:
 est_many = feols(Ozone ~ mvsw(Solar.R, Wind, Temp), airquality)
 etable(est_many, adjustbox = 1.1, tex = TRUE)
 ```
-
-#### page.width
-
-Since the tables are embedded in a standalone LaTeX document, the table fits the PDF file completely, without any margin. This means that whatever the width of the table (be it two or twenty columns), it will always take 100% of the width of the PDF. 
-
-While this property is fine when displaying on the viewer, it makes the tables look odd and inconsistent in an HTML document. The `page.width` argument sets the width and side margins of the page in which the table will be inserted. The goal is to mimic the placement of the table in a *real* PDF document (i.e. in your article). For instance, `page.width = "a4"` will set an A4 page width and 2cm side margins on both sides. This argument can be customized at will: e.g. `8.5in, 1.1in` will lead to a page width of 8.5 inches with 1.1 inch side margins (the only constraint is that the unit of the width should be the same as the unit of the margin).
-
-When `page.width` is set up, all tables in an HTML document will be consistent: the font will be the same across tables. On top of that, it also enables a couple of specific features. First, if the table is too narrow, you can use a *tabularx* table (with the argument `tabular`) and the table will be as large as the "text" width. Second, if the table overflows, you can adjust it with the argument `adjustbox` to make it fit the text width.
 
 #### makecell
 
@@ -395,6 +387,14 @@ This ensures that the tables are the same whether the output is a PDF or an HTML
 
 When using `markdown = TRUE`, the image of the table is embedded in a `<div>` container whose default class is `etable`. You can set the class of that `<div>` manually with the argument `div.class` and apply custom CSS styling. You can add this as a custom CSS entry to your Quarto/Rmarkdown document for exporting to HTML, or bundle it as part of a theme. An example of the latter can be found in the [clean theme](https://grantmcdermott.com/quarto-revealjs-clean-demo/template.html#/regression-tables) for Quarto Reveal.js format.
 
+
+#### Monitoring the look of the tables: the argument page.width
+
+As mentioned, to generate a PNG image, a LaTex table is first embedded in a standalone LaTeX document, then the document is compiled to generate a PDF, and the PDF is converted to PNG. The default LaTex document has no page size and no margin, meaning that whatever the width of the table (be it two or twenty columns), it will always take 100% of the width of the PDF. 
+
+While this property is fine when displaying on the viewer, it makes the tables look odd and inconsistent in an HTML document. The `page.width` argument sets the width and side margins of the page in which the table will be inserted. The goal is to mimic the placement of the table in a *real* PDF document (i.e. in your article). For instance, `page.width = "a4"` will set an A4 page width and 2cm side margins on both sides. This argument can be customized at will: e.g. `8.5in, 1.1in` will lead to a page width of 8.5 inches with 1.1 inch side margins (the only constraint is that the unit of the width should be the same as the unit of the margin).
+
+When `page.width` is set up, all tables in an HTML document will be consistent: the font will be the same across tables. On top of that, it also enables a couple of specific features. First, if the table is too narrow, you can use a *tabularx* table (with the argument `tabular`) and the table will be as large as the "text" width. Second, if the table overflows, you can adjust it with the argument `adjustbox` to make it fit the text width.
 
 ### RStudio and Positron (VS Code): argument `view`
 
