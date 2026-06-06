@@ -2674,6 +2674,14 @@ results2formattedList = function(dots, vcov = NULL, ssc = NULL, stage = 2,
       fam = "Poisson"
     } else if(x$method == "fenegbin"){
       fam = "Neg. Bin."
+    } else if(x$method == "ferols") {
+        cap <- function(x) {
+            paste0(toupper(substr(x, 1, 1)), substring(x, 2))
+        }
+        fam = paste0(
+            "Robust M (", cap(x$robust$family), " ",
+            round(100*x$robust$efficiency), "% efficiency)"
+        )
     }
     family_list[[m]] = fam
 
